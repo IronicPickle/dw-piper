@@ -1,7 +1,8 @@
 import sys, threading
-from background import main as background_main
-from menu import main as menu_main
-from update_check import compare_versions as compare_versions
+sys.path.append("./src")
+from src.background import main as background_main
+from src.menu import main as menu_main
+from src.update_check import compare_versions as compare_versions
 
 def main():
 

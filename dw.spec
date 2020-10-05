@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['dw.py'],
+a = Analysis(['./src/dw.py'],
              pathex=['.'],
              binaries=[],
              datas=[],
