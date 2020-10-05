@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['./src/dw.py'],
+a = Analysis(['./dw.py'],
              pathex=['.'],
              binaries=[],
              datas=[],
@@ -16,7 +16,7 @@ a = Analysis(['./src/dw.py'],
              cipher=block_cipher,
              noarchive=False)
 a.datas += [("icon.ico", "./icon.ico", "Data")]
-a.datas += [("version", "version", "Data")]
+a.datas += [("version", "./version", "Data")]
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
@@ -29,7 +29,8 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False,
-          icon="icon.ico" )
+          icon="./icon.ico",
+          manifest=None )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
