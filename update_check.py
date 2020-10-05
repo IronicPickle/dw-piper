@@ -22,7 +22,7 @@ def check_latest_version():
   else:
     print(f"Response Error: {res.status_code}")
 
-def compare_versions():
+def compare_versions(latest_version_known):
 
   with open(path.join(index_dir, "version")) as version_file:
     current_version_int = version_to_int(version_file.read())
@@ -32,11 +32,15 @@ def compare_versions():
   if not latest_version:
     return
 
-  latest_version_int = latest_version["versionInt"]
-
-  if latest_version_int > current_version_int:
+  if latest_version["versionInt"] > current_version_int:
     print("Update available")
+    if latest_version_known == latest_version:
+      print("Already notified user, skipping...")
+      return latest_version
+    print("Prompting user...")
     update_prompt_main(latest_version, download_version)
+
+  return latest_version
 
 def version_to_int(version):
   version_parts = version.split(".")
