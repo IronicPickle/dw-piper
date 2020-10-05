@@ -1,0 +1,13 @@
+__pycache__
+
+
+# Build directories
+build/
+dist/
+output/
+
+dw
+dw-background
+state.json
+
+.vscode/
