@@ -11,6 +11,7 @@ import cv2
 import win32clipboard
 from win10toast import ToastNotifier
 import utils
+from pdf_processor import replace_img as pdf_replace_img
 
 res = pyautogui.size()
 index_dir = path.abspath(path.dirname(sys.argv[0]))
@@ -241,20 +242,17 @@ def main(root, pipe_type):
       final_img.paste(masked_img, (0, 0), masked_img)
 
     final_img.save(path.join(index_dir, f"images/{pipe_type}_final.png"), "PNG")
-
-    output = BytesIO()
-    final_img.convert("RGB").save(output, "BMP")
-    data = output.getvalue()[14:]
-    output.close()
-
-    send_to_clipboard(win32clipboard.CF_DIB, data)
+    pdf_replace_img(
+      path.join(index_dir, f"./pdf_templates/{pipe_type}_template.pdf"),
+      path.join(index_dir, f"images/{pipe_type}_final.png"), pipe_type
+    )
 
     with open(path.join(index_dir, "state.json"), "w", encoding='utf-8') as state_file:
       json.dump({
         "x": capture_x, "y": capture_y, "size": box_size
       }, state_file, ensure_ascii=False, indent=4)
 
-    toaster.show_toast(f"Copied {pipe_type} map to clipboard",
+    toaster.show_toast(f"Created {pipe_type}.pdf",
       f"Size: {box_size} x {box_size}",
       icon_path=path.join(index_dir, "icon.ico"),
       duration=3,
@@ -266,12 +264,6 @@ def main(root, pipe_type):
       key_events[event.keycode]()
     except:
       pass
-
-  def send_to_clipboard(clip_type, data):
-    win32clipboard.OpenClipboard()
-    win32clipboard.EmptyClipboard()
-    win32clipboard.SetClipboardData(clip_type, data)
-    win32clipboard.CloseClipboard()
 
   key_events = {
     27: destroy_root,

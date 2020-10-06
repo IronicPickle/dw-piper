@@ -2,7 +2,6 @@ import sys, threading
 from background import main as background_main
 from menu import main as menu_main
 from update_check import compare_versions as compare_versions
-from pdf_processor import main as pdf_processor_main
 
 def main():
 

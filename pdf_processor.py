@@ -1,19 +1,30 @@
-import re
+import tkinter as tk
+from tkinter import filedialog as fd
+import fitz
+from pathlib import Path
 
-def main():
-  with open("./test.pdf", "rb") as pdf_file:
-    pdf_data = str(pdf_file.read())
-    stream_starts = [result for result in re.finditer("\n", pdf_data)]
-    stream_ends = [result for result in re.finditer("\n", pdf_data)]
+def replace_img(template_path, img_path, pipe_type):
+  pdf_template = fitz.open(template_path)
+  x, y, size = 60, 46, 472
+  rectangle = fitz.Rect(x, y, x + size, y + size)
 
-    #print(stream_starts)
-    #print(stream_ends)
+  for page in pdf_template:
+    page.insertImage(rectangle, filename=img_path)
 
-    print(pdf_data[stream_starts[0].span()[0]:stream_ends[0].span()[1]])
+  root = tk.Tk()
+  root.withdraw()
 
-def stream_sort(span):
-  return span[0]
-      
+  def open_file_dialog():
+    output_path = fd.asksaveasfilename(
+      initialdir="/",
+      title=f"Save {pipe_type} PDF file",
+      filetypes=[("PDF File", "*.pdf")],
+      defaultextension=".pdf",
+      initialfile="CC" if pipe_type == "clean" else "DD"
+    )
+    root.destroy()
 
+    pdf_template.save(output_path)
 
-if __name__ == "__main__": main()
+  root.after(1, open_file_dialog)
+  root.mainloop()
