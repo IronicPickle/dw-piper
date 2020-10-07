@@ -1,5 +1,5 @@
 import sys
-from os import path
+from os import path, getenv, remove
 import subprocess
 import json
 
@@ -8,6 +8,7 @@ import requests
 from update_prompt import main as update_prompt_main
 
 index_dir = path.abspath(path.dirname(sys.argv[0]))
+appdata_path = path.join(getenv('APPDATA'), "DW-Piper")
 
 def check_latest_version():
 
@@ -59,11 +60,13 @@ def download_version(version, download_finish_callback):
     return None
 
   if res.status_code == 200:
-    setup_path = path.join(index_dir, "DW Piper Setup.exe")
+    setup_path = path.join(appdata_path, "DW Piper Setup.exe")
     with open(setup_path, "wb") as file:
       file.write(res.content)
       file.close()
       download_finish_callback()
       subprocess.call(f"\"{setup_path}\"", shell=False)
+      remove(setup_path)
+
   else:
     print(f"Response Error: {res.status_code}")

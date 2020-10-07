@@ -47,8 +47,6 @@ def main(latest_version, download_version):
 
   root.bind("<Key>", key_press)
 
-  root.overrideredirect(1)
-
   monitor_info = win32api.GetMonitorInfo(win32api.MonitorFromPoint((0,0)))
   work_area = monitor_info["Work"]
 
@@ -56,7 +54,7 @@ def main(latest_version, download_version):
   root.attributes("-alpha", 0.9)
   root.config(bg="black", highlightthickness=1, highlightbackground="white")
   root.minsize(450, 200)
-  root.geometry('%dx%d+%d+%d' % (450, 200, work_area[2] - 450, work_area[3] - 200))
+  root.geometry('%dx%d+%d+%d' % (450, 200, work_area[2] - 463, work_area[3] - 236))
   root.title("DW Piper")
   root.iconbitmap(path.join(index_dir, "icon.ico"))
 
