@@ -3,7 +3,6 @@ from os import path
 import tkinter as tk
 
 import pyautogui
-import zc.lockfile as lockfile
 
 from upload import main as upload_main
 from capture import main as capture_main
@@ -13,12 +12,6 @@ res = pyautogui.size()
 index_dir = path.abspath(path.dirname(sys.argv[0]))
 
 def main():
-
-  try:
-    lock = lockfile.LockFile(path.join(index_dir, "dw"))
-  except lockfile.LockError:
-    print("DW Piper already running")
-    sys.exit()
 
   print("Starting main menu")
 
@@ -142,6 +135,5 @@ def main():
 
   root.mainloop()
   print("Root destroyed")
-  lock.close()
 
 if __name__ == "__main__": main()

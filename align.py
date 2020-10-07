@@ -1,6 +1,6 @@
 import math
 import sys
-from os import path
+from os import path, getenv
 import pathlib
 import json
 import tkinter as tk
@@ -18,6 +18,7 @@ toaster = ToastNotifier()
 
 res = pyautogui.size()
 index_dir = path.abspath(path.dirname(sys.argv[0]))
+appdata_path = path.join(getenv('APPDATA'), "DW-Piper")
 
 def main(root, pipe_type):
 
@@ -103,36 +104,47 @@ def main(root, pipe_type):
     box_size = image_label.winfo_width()
     destroy_back_frame()
     destroy_root()
-    pathlib.Path(path.join(index_dir, "images")).mkdir(parents=True, exist_ok=True)
-    pyautogui.screenshot(path.join(index_dir, f"images/{pipe_type}.png"), (
+    pathlib.Path(path.join(appdata_path, "images")).mkdir(parents=True, exist_ok=True)
+    pyautogui.screenshot(path.join(appdata_path, f"images/{pipe_type}.png"), (
       capture_x, capture_y,
       image_label.image.width(), image_label.image.height()
     ))
 
     print(f"{pipe_type} screenshot taken at: {capture_x}, {capture_y}\n  Size: {box_size} x {box_size}")
 
-    img = cv2.cvtColor(cv2.imread(path.join(index_dir, f"images/{pipe_type}.png")), cv2.COLOR_BGR2BGRA)
-    final_img = initial_img.resize((box_size, box_size), Image.LANCZOS)
+    img = cv2.cvtColor(cv2.imread(path.join(appdata_path, f"images/{pipe_type}.png")), cv2.COLOR_BGR2BGRA)
+    final_img = Image.open(path.join(appdata_path, "images/initial.png"))
+    width, height = final_img.size
 
-    pathlib.Path(path.join(index_dir, "images/masks/drainage")).mkdir(parents=True, exist_ok=True)
-    pathlib.Path(path.join(index_dir, "images/masks/clean")).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(path.join(appdata_path, "images/masks/drainage")).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(path.join(appdata_path, "images/masks/clean")).mkdir(parents=True, exist_ok=True)
     for i in utils.bgra_bounds[pipe_type]:
       bgra_bound = utils.bgra_bounds[pipe_type][i]
       masked_img = utils.apply_mask(img, bgra_bound)
       print(f"Generated {i} mask")
-      cv2.imwrite(path.join(index_dir, f"images/masks/{pipe_type}/{i}.png"), masked_img)
-      masked_img = Image.open(path.join(index_dir, f"images/masks/{pipe_type}/{i}.png"))
+      masked_img = cv2.resize(masked_img, (height, width), interpolation=cv2.INTER_CUBIC)
+      cv2.imwrite(path.join(appdata_path, f"images/masks/{pipe_type}/{i}.png"), masked_img)
+      masked_img = Image.open(path.join(appdata_path, f"images/masks/{pipe_type}/{i}.png"))
       final_img.paste(masked_img, (0, 0), masked_img)
 
-    with open(path.join(index_dir, "state.json"), "w", encoding='utf-8') as state_file:
-      json.dump({
-        "x": capture_x, "y": capture_y, "size": box_size
-      }, state_file, ensure_ascii=False, indent=4)
+    state_path = path.join(appdata_path, "state.json")
+    default_state = {
+      "x": capture_x, "y": capture_y, "size": box_size
+    }
 
-    final_img.save(path.join(index_dir, f"images/{pipe_type}_final.png"), "PNG")
+    with open(state_path, "r", encoding='utf-8') as state_file:
+      state = json.loads(state_file.read())
+      state["x"] = default_state["x"]
+      state["y"] = default_state["y"]
+      state["size"] = default_state["size"]
+      with open(state_path, "w", encoding='utf-8') as state_file:
+        json.dump(state, state_file, ensure_ascii=False, indent=4)
+
+    final_img.save(path.join(appdata_path, f"images/{pipe_type}_final.png"), "PNG")
     pdf_template = pdf_insert_map_img(
       path.join(index_dir, f"./pdf_templates/{pipe_type}_template.pdf"),
-      path.join(index_dir, f"images/{pipe_type}_final.png")
+      path.join(appdata_path, f"images/{pipe_type}_final.png"),
+      path.join(index_dir, "./images/copyright.png")
     )
 
     root = tk.Tk()
@@ -143,13 +155,25 @@ def main(root, pipe_type):
     def open_file_dialog():
       nonlocal output_path
       nonlocal pipe_type
-      output_path = fd.asksaveasfilename(
-        initialdir="/",
-        title=f"Save {pipe_type} PDF file",
-        filetypes=[("PDF File", "*.pdf")],
-        defaultextension=".pdf",
-        initialfile="CC" if pipe_type == "clean" else "DD"
-      )
+
+      state_path = path.join(appdata_path, "state.json")
+      with open(state_path, "r", encoding='utf-8') as state_file:
+        state = json.loads(state_file.read())
+
+        output_path = fd.asksaveasfilename(
+          initialdir=state["save_dir"] if "save_dir" in state else "/",
+          title=f"Save {pipe_type} PDF file",
+          filetypes=[("PDF File", "*.pdf")],
+          defaultextension=".pdf",
+          initialfile="CC" if pipe_type == "clean" else "DD"
+        )
+
+        if output_path:
+          state["save_dir"] = path.dirname(output_path)
+
+          with open(state_path, "w", encoding='utf-8') as state_file:
+            json.dump(state, state_file, ensure_ascii=False, indent=4)
+
       root.destroy()
 
     root.after(1, open_file_dialog)
@@ -194,7 +218,7 @@ def main(root, pipe_type):
     expand=True
   )
 
-  initial_img = Image.open(path.join(index_dir, "images/initial.png"))
+  initial_img = Image.open(path.join(appdata_path, "images/initial.png"))
   initial_photoimage = ImageTk.PhotoImage(initial_img)
 
   image_label = tk.Label(
@@ -233,12 +257,13 @@ def main(root, pipe_type):
 
   def back_frame_after():
     back_frame.focus_force()
-    with open(path.join(index_dir, "state.json"), "r", encoding='utf-8') as state_file:
+    with open(path.join(appdata_path, "state.json"), "r", encoding='utf-8') as state_file:
       state = json.load(state_file)
       resize_initial_img(state["size"])
       image_label.place(
         anchor="center",
         x=state["x"] + (state["size"] / 2),
+        
         y=state["y"] + (state["size"] / 2))
 
   back_frame.after(1, back_frame_after)

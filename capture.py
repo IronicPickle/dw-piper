@@ -1,5 +1,5 @@
 import sys
-from os import path
+from os import path, getenv
 import pathlib
 import json
 import tkinter as tk
@@ -10,6 +10,7 @@ from win10toast import ToastNotifier
 
 res = pyautogui.size()
 index_dir = path.abspath(path.dirname(sys.argv[0]))
+appdata_path = path.join(getenv('APPDATA'), "DW-Piper")
 toaster = ToastNotifier()
 
 def main(root):
@@ -80,18 +81,31 @@ def main(root):
     box_size = selection_frame.winfo_width()
     destroy_back_frame()
     destroy_root()
-    pathlib.Path(path.join(index_dir, "images")).mkdir(parents=True, exist_ok=True)
-    pyautogui.screenshot(path.join(index_dir, "images/initial.png"), (
+    pathlib.Path(path.join(appdata_path, "images")).mkdir(parents=True, exist_ok=True)
+    pyautogui.screenshot(path.join(appdata_path, "images/initial.png"), (
       capture_x, capture_y,
       box_size, box_size
     ))
 
-    with open(path.join(index_dir, "state.json"), "w", encoding='utf-8') as state_file:
-      json.dump({
-        "x": int((res[0] / 2) - (box_size / 2)),
-        "y": int((res[1] / 2) - (box_size / 2)),
-        "size": box_size
-      }, state_file, ensure_ascii=False, indent=4)
+    state_path = path.join(appdata_path, "state.json")
+    default_state = {
+      "x": int((res[0] / 2) - (box_size / 2)),
+      "y": int((res[1] / 2) - (box_size / 2)),
+      "size": box_size
+    }
+
+    if not path.exists(state_path):
+      with open(state_path, "w", encoding='utf-8') as state_file:
+        json.dump(default_state, state_file, ensure_ascii=False, indent=4)
+    else:
+      with open(state_path, "r", encoding='utf-8') as state_file:
+        state = json.loads(state_file.read())
+        state["x"] = default_state["x"]
+        state["y"] = default_state["y"]
+        state["size"] = default_state["size"]
+        with open(state_path, "w", encoding='utf-8') as state_file:
+          json.dump(state, state_file, ensure_ascii=False, indent=4)
+
 
     print(f"Initial screenshot taken at: {capture_x}, {capture_y}\n  Size: {box_size} x {box_size}")
 

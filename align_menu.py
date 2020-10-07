@@ -1,5 +1,5 @@
 import sys
-from os import path
+from os import path, getenv
 import pathlib
 import tkinter as tk
 
@@ -8,28 +8,12 @@ from win10toast import ToastNotifier
 from align import main as align_main
 
 index_dir = path.abspath(path.dirname(sys.argv[0]))
+appdata_path = path.join(getenv('APPDATA'), "DW-Piper")
 toaster = ToastNotifier()
 
 def main(root):
 
   print("Starting align menu")
-
-  if not pathlib.Path(path.join(index_dir, "images/initial.png")).exists():
-    print("No initial image found")
-    return toaster.show_toast("Couldn't find initial image",
-      "You must take a screenshot first",
-      icon_path=path.join(index_dir, "icon.ico"),
-      duration=10,
-      threaded=True
-    )
-  if not pathlib.Path(path.join(index_dir, "state.json")).exists():
-    print("No state file found")
-    return toaster.show_toast("Couldn't find state file",
-      "You must take a screenshot first",
-      icon_path=path.join(index_dir, "icon.ico"),
-      duration=10,
-      threaded=True
-    )
 
   def destroy_root():
     root.destroy()
@@ -57,6 +41,25 @@ def main(root):
     67: clean,
     68: drainage
   }
+
+  if not pathlib.Path(path.join(appdata_path, "images/initial.png")).exists():
+    destroy_root()
+    print("No initial image found")
+    return toaster.show_toast("Couldn't find initial image",
+      "You must take a screenshot first",
+      icon_path=path.join(index_dir, "icon.ico"),
+      duration=10,
+      threaded=True
+    )
+  if not pathlib.Path(path.join(appdata_path, "state.json")).exists():
+    destroy_root()
+    print("No state file found")
+    return toaster.show_toast("Couldn't find state file",
+      "You must take a screenshot first",
+      icon_path=path.join(index_dir, "icon.ico"),
+      duration=10,
+      threaded=True
+    )
 
   root.bind("<Key>", key_press)
 

@@ -58,11 +58,11 @@ end;
 
 [Run]
 Filename: "schtasks"; \
-    Parameters: "/CREATE /F /RL highest /SC ONLOGON /TN ""DW Piper"" /TR ""'{app}\{#ExeName}.exe' --launch-background"""; \
+    Parameters: "/CREATE /F /SC ONLOGON /TN ""DW Piper"" /TR ""'{app}\{#ExeName}.exe' --launch-background"""; \
     Flags: runhidden
 Filename: "{app}\{#ExeName}"; \
     Parameters: "--launch-background"; \
-    Flags: runhidden nowait
+    Flags: runhidden nowait runasoriginaluser
 
 [UninstallRun]
 Filename: "schtasks"; \
