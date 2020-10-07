@@ -1,41 +1,50 @@
 import sys
 from os import path
+import pathlib
 import tkinter as tk
-import pyautogui
+
 from win10toast import ToastNotifier
-import zc.lockfile as lockfile
-from capture import main as capture_main
-from align import select as align_select
 
-res = pyautogui.size()
+from align import main as align_main
+
 index_dir = path.abspath(path.dirname(sys.argv[0]))
+toaster = ToastNotifier()
 
-def main():
+def main(root):
 
-  try:
-    lock = lockfile.LockFile(path.join(index_dir, "dw"))
-  except lockfile.LockError:
-    print("DW Piper already running")
-    sys.exit()
+  print("Starting align menu")
 
-  print("Starting main menu")
-
-  root = tk.Tk()
+  if not pathlib.Path(path.join(index_dir, "images/initial.png")).exists():
+    print("No initial image found")
+    return toaster.show_toast("Couldn't find initial image",
+      "You must take a screenshot first",
+      icon_path=path.join(index_dir, "icon.ico"),
+      duration=10,
+      threaded=True
+    )
+  if not pathlib.Path(path.join(index_dir, "state.json")).exists():
+    print("No state file found")
+    return toaster.show_toast("Couldn't find state file",
+      "You must take a screenshot first",
+      icon_path=path.join(index_dir, "icon.ico"),
+      duration=10,
+      threaded=True
+    )
 
   def destroy_root():
     root.destroy()
 
   def destroy_back_frame():
     back_frame.destroy()
-    print("Destroyed main menu")
+    print("Destroyed select menu")
 
-  def capture():
+  def clean():
     destroy_back_frame()
-    capture_main(root)
+    align_main(root, "clean")
 
-  def align():
+  def drainage():
     destroy_back_frame()
-    align_select(root)
+    align_main(root, "drainage")
 
   def key_press(event):
     try:
@@ -45,8 +54,8 @@ def main():
 
   key_events = {
     27: destroy_root,
-    67: capture,
-    65: align
+    67: clean,
+    68: drainage
   }
 
   root.bind("<Key>", key_press)
@@ -82,29 +91,29 @@ def main():
   )
   button_frame.pack(side=tk.TOP)
 
-  capture_button = tk.Button(
+  clean_button = tk.Button(
     button_frame,
-    text="Capture",
+    text="Clean",
     font=("Courier", 12),
-    command=capture,
+    command=clean,
     cursor="hand2",
     bd=0,
     bg="black",
     fg="white"
   )
-  capture_button.pack(side=tk.LEFT, padx=10)
+  clean_button.pack(side=tk.LEFT, padx=10)
 
-  align_button = tk.Button(
+  drainage_button = tk.Button(
     button_frame,
-    text="Align",
+    text="Drainage",
     font=("Courier", 12),
-    command=align,
+    command=drainage,
     cursor="hand2",
     bd=0,
     bg="black",
     fg="white"
   )
-  align_button.pack(side=tk.LEFT, padx=10)
+  drainage_button.pack(side=tk.LEFT, padx=10)
 
   cancel_button = tk.Button(
     button_frame,
@@ -118,9 +127,4 @@ def main():
   )
   cancel_button.pack(side=tk.LEFT, padx=10)
 
-  root.after(1, root.focus_force)
-
-  root.mainloop()
-  print("Root destroyed")
-
-if __name__ == "__main__": main()
+  back_frame.after(1, back_frame.focus_force)

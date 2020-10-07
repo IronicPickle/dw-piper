@@ -17,6 +17,8 @@ a = Analysis(['./dw.py'],
              noarchive=False)
 a.datas += [("icon.ico", "./icon.ico", "Data")]
 a.datas += [("version", "./version", "Data")]
+a.datas += Tree("./pdf_templates", prefix="pdf_templates")
+
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
@@ -28,7 +30,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=False,
+          console=True,
           icon="./icon.ico",
           manifest=None )
 coll = COLLECT(exe,

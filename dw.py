@@ -1,6 +1,7 @@
 import sys, threading
+
 from background import main as background_main
-from menu import main as menu_main
+from main_menu import main as main_menu_main
 from update_check import compare_versions as compare_versions
 
 def main():
@@ -16,7 +17,7 @@ def main():
   if background_arg > 0:
     sys.exit()
 
-  menu_main()
+  main_menu_main()
 
 def update_check_scheduler(latest_version_known):
   print("Performing update check...")

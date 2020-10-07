@@ -3,7 +3,9 @@ from os import path
 import pathlib
 import json
 import tkinter as tk
+
 import pyautogui
+
 from win10toast import ToastNotifier
 
 res = pyautogui.size()

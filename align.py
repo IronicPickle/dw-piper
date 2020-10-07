@@ -4,137 +4,20 @@ from os import path
 import pathlib
 import json
 import tkinter as tk
-from io import BytesIO
+from tkinter import filedialog as fd
+
 import pyautogui
 from PIL import Image, ImageTk
 import cv2
-import win32clipboard
 from win10toast import ToastNotifier
+
 import utils
-from pdf_processor import replace_img as pdf_replace_img
+from pdf_processor import insert_map_img as pdf_insert_map_img
+
+toaster = ToastNotifier()
 
 res = pyautogui.size()
 index_dir = path.abspath(path.dirname(sys.argv[0]))
-toaster = ToastNotifier()
-
-def select(root):
-
-  print("Starting align menu")
-
-  if not pathlib.Path(path.join(index_dir, "images/initial.png")).exists():
-    print("No initial image found")
-    return toaster.show_toast("Couldn't find initial image",
-      "You must take a screenshot first",
-      icon_path=path.join(index_dir, "icon.ico"),
-      duration=10,
-      threaded=True
-    )
-  if not pathlib.Path(path.join(index_dir, "state.json")).exists():
-    print("No state file found")
-    return toaster.show_toast("Couldn't find state file",
-      "You must take a screenshot first",
-      icon_path=path.join(index_dir, "icon.ico"),
-      duration=10,
-      threaded=True
-    )
-
-  def destroy_root():
-    root.destroy()
-
-  def destroy_back_frame():
-    back_frame.destroy()
-    print("Destroyed select menu")
-
-  def clean():
-    destroy_back_frame()
-    main(root, "clean")
-
-  def drainage():
-    destroy_back_frame()
-    main(root, "drainage")
-
-  def key_press(event):
-    try:
-      key_events[event.keycode]()
-    except:
-      pass
-
-  key_events = {
-    27: destroy_root,
-    67: clean,
-    68: drainage
-  }
-
-  root.bind("<Key>", key_press)
-
-  root.attributes("-alpha", 0.75)
-  root.attributes("-fullscreen", True)
-  root.attributes("-topmost", True)
-  root.config(bg="black")
-
-  back_frame = tk.Frame(root, bg="black")
-  back_frame.pack(
-    fill="both",
-    expand=True
-  )
-
-  front_frame = tk.Frame(back_frame, bg="black")
-  front_frame.place(anchor="center", relx=0.5, rely=0.5)
-
-  button_label = tk.Label(
-    front_frame,
-    text="Choose an Option",
-    font=("Courier", 16),
-    pady=10,
-    bg="black",
-    fg="white"
-  )
-  button_label.pack(side=tk.TOP)
-
-  button_frame = tk.Label(
-    front_frame,
-    bg="black",
-    fg="white"
-  )
-  button_frame.pack(side=tk.TOP)
-
-  clean_button = tk.Button(
-    button_frame,
-    text="Clean",
-    font=("Courier", 12),
-    command=clean,
-    cursor="hand2",
-    bd=0,
-    bg="black",
-    fg="white"
-  )
-  clean_button.pack(side=tk.LEFT, padx=10)
-
-  drainage_button = tk.Button(
-    button_frame,
-    text="Drainage",
-    font=("Courier", 12),
-    command=drainage,
-    cursor="hand2",
-    bd=0,
-    bg="black",
-    fg="white"
-  )
-  drainage_button.pack(side=tk.LEFT, padx=10)
-
-  cancel_button = tk.Button(
-    button_frame,
-    text="Cancel",
-    font=("Courier", 12),
-    command=destroy_root,
-    cursor="hand2",
-    bd=0,
-    bg="black",
-    fg="white"
-  )
-  cancel_button.pack(side=tk.LEFT, padx=10)
-
-  back_frame.after(1, back_frame.focus_force)
 
 def main(root, pipe_type):
 
@@ -241,23 +124,45 @@ def main(root, pipe_type):
       masked_img = Image.open(path.join(index_dir, f"images/masks/{pipe_type}/{i}.png"))
       final_img.paste(masked_img, (0, 0), masked_img)
 
-    final_img.save(path.join(index_dir, f"images/{pipe_type}_final.png"), "PNG")
-    pdf_replace_img(
-      path.join(index_dir, f"./pdf_templates/{pipe_type}_template.pdf"),
-      path.join(index_dir, f"images/{pipe_type}_final.png"), pipe_type
-    )
-
     with open(path.join(index_dir, "state.json"), "w", encoding='utf-8') as state_file:
       json.dump({
         "x": capture_x, "y": capture_y, "size": box_size
       }, state_file, ensure_ascii=False, indent=4)
 
-    toaster.show_toast(f"Created {pipe_type}.pdf",
-      f"Size: {box_size} x {box_size}",
-      icon_path=path.join(index_dir, "icon.ico"),
-      duration=3,
-      threaded=True
+    final_img.save(path.join(index_dir, f"images/{pipe_type}_final.png"), "PNG")
+    pdf_template = pdf_insert_map_img(
+      path.join(index_dir, f"./pdf_templates/{pipe_type}_template.pdf"),
+      path.join(index_dir, f"images/{pipe_type}_final.png")
     )
+
+    root = tk.Tk()
+    root.withdraw()
+
+    output_path = None
+
+    def open_file_dialog():
+      nonlocal output_path
+      nonlocal pipe_type
+      output_path = fd.asksaveasfilename(
+        initialdir="/",
+        title=f"Save {pipe_type} PDF file",
+        filetypes=[("PDF File", "*.pdf")],
+        defaultextension=".pdf",
+        initialfile="CC" if pipe_type == "clean" else "DD"
+      )
+      root.destroy()
+
+    root.after(1, open_file_dialog)
+    root.mainloop()
+
+    if output_path:
+      pdf_template.save(output_path)
+      toaster.show_toast(f"Created {path.basename(output_path)} at",
+        output_path,
+        icon_path=path.join(index_dir, "icon.ico"),
+        duration=3,
+        threaded=True
+      )
 
   def key_press(event):
     try:

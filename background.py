@@ -1,8 +1,10 @@
 import sys
 from os import path
+
 import keyboard
 import zc.lockfile as lockfile
-from menu import main as menu_main
+
+from main_menu import main as main_menu_main
 
 index_dir = path.abspath(path.dirname(sys.argv[0]))
 
@@ -17,7 +19,7 @@ def main():
   def key_print_screen(key):
     if key.name == "print screen":
       print("Detected print screen")
-      menu_main()
+      main_menu_main()
 
   keyboard.on_release_key("print screen", key_print_screen)
   print("Listening for 'print screen' key release")

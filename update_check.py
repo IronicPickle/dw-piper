@@ -2,7 +2,9 @@ import sys
 from os import path
 import subprocess
 import json
+
 import requests
+
 from update_prompt import main as update_prompt_main
 
 index_dir = path.abspath(path.dirname(sys.argv[0]))
