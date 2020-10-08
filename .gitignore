@@ -6,8 +6,4 @@ build/
 dist/
 output/
 
-dw
-dw-background
-state.json
-
 .vscode/
