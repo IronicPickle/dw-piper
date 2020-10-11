@@ -5,7 +5,9 @@ import json
 
 import requests
 
-from update_prompt import main as update_prompt_main
+from src import tk_overlay, update_prompt
+from src.tk_overlay import TkOverlay
+from src.update_prompt import UpdatePrompt
 
 index_dir = path.abspath(path.dirname(sys.argv[0]))
 appdata_path = path.join(getenv('APPDATA'), "DW-Piper")
@@ -41,7 +43,7 @@ def compare_versions(latest_version_known):
       print("Already notified user, skipping...")
       return latest_version
     print("Prompting user...")
-    update_prompt_main(latest_version, download_version)
+    UpdatePrompt(TkOverlay(), latest_version, download_version)
 
   return latest_version
 

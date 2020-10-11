@@ -1,14 +1,15 @@
-from tkinter import Label, Button, LEFT, TOP
+from tkinter import Label, Button, Entry, LEFT, TOP, CENTER, StringVar
 
-from src import upload, capture, align_menu
-from src.upload import Upload
-from src.capture import Capture
-from src.align_menu import AlignMenu
+from src import state_manager
 
-class MainMenu:
+class ReferenceMenu:
 
   def __init__(self, tk_overlay):
-    print("Main Menu > Started")
+    print("Reference Menu > Started")
+
+    self.reference = StringVar()
+    state = state_manager.get()
+    state_manager.update(state, { "reference": "" })
 
     tk_overlay.generate_frames()
 
@@ -21,13 +22,24 @@ class MainMenu:
 
     self.button_label = Label(
       self.front_frame,
-      text="Choose an Option",
+      text="Input your Reference",
       font=("Courier", 16),
       pady=10,
       bg="black",
       fg="white"
     )
     self.button_label.pack(side=TOP)
+
+    self.reference_entry = Entry(
+      self.front_frame,
+      font=("Courier", 12),
+      textvariable=self.reference,
+      bg="black",
+      fg="white",
+      insertbackground="white",
+      justify=CENTER
+    )
+    self.reference_entry.pack(side=TOP, pady=10)
 
     self.button_frame = Label(
       self.front_frame,
@@ -36,12 +48,10 @@ class MainMenu:
     )
     self.button_frame.pack(side=TOP)
 
-    self.generate_buttons("Upload", self.start_upload)
-    self.generate_buttons("Capture", self.start_capture)
-    self.generate_buttons("Align", self.start_align)
+    self.generate_buttons("Submit", self.submit)
     self.generate_buttons("Cancel", self.destroy_root)
 
-    self.root.after(1, self.root.focus_force)
+    self.root.after(1, self.reference_entry.focus)
 
     self.root.mainloop()
 
@@ -64,26 +74,17 @@ class MainMenu:
 
   def destroy_back_frame(self):
     self.back_frame.destroy()
-    print("Main Menu > Destroyed")
+    print("Reference Menu > Destroyed")
 
-  def start_upload(self):
+  def submit(self):
+    state = state_manager.get()
+    state_manager.update(state, { "reference": self.reference.get() })
     self.root.destroy()
-    Upload()
-
-  def start_capture(self):
-    self.destroy_back_frame()
-    Capture(self.tk_overlay)
-
-  def start_align(self):
-    self.destroy_back_frame()
-    AlignMenu(self.tk_overlay)
 
   def key_press(self, event):
     key_events = {
       27: self.destroy_root,
-      85: self.start_upload,
-      67: self.start_capture,
-      65: self.start_align
+      13: self.submit
     }
     try:
       key_events[event.keycode]()

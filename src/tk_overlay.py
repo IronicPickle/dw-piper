@@ -3,6 +3,9 @@ from tkinter import Tk, Frame
 class TkOverlay:
 
   def __init__(self):
+
+    print("Root > Started")
+
     self.root = Tk()
 
     self.root.attributes("-alpha", 0.75)

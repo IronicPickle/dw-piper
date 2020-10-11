@@ -11,34 +11,31 @@ from pyautogui import position
 import cv2
 from win10toast import ToastNotifier
 
-from vars import Env, Bounds
-import state_manager
+from src import variables, pdf_processor, state_manager
+from src.variables import Env, Bounds
+from src.pdf_processor import PdfProcessor
 
 class Align:
-  key_events = {
-    27: destroy_root,
-    37: key_left,
-    38: key_up,
-    39: key_right,
-    40: key_down,
-    107: key_plus,
-    109: key_minus,
-    13: finish
-  }
 
-  def __init__(self, TkOverlay, pipe_type):
+  def __init__(self, tk_overlay, pipe_type):
 
-    print("Starting align")
+    print("Align > Started")
+
+    state = state_manager.get()
+    self.capture_x = int(state["x"])
+    self.capture_y = int(state["y"])
+    self.capture_size = int(state["size"])
 
     self.pipe_type = pipe_type
     self.img_path = path.join(Env.appdata_path, f"images/{pipe_type}.png")
 
-    TkOverlay.generate_buttons()
+    tk_overlay.generate_frames()
 
-    self.tk_overlay = TkOverlay
-    self.root = TkOverlay.root
-    self.back_frame = TkOverlay.back_frame
-    self.front_frame = TkOverlay.front_frame
+    self.tk_overlay = tk_overlay
+    self.root = tk_overlay.root
+    self.back_frame = tk_overlay.back_frame
+    self.front_frame = tk_overlay.front_frame
+
 
     self.root.bind("<Key>", self.key_press)
 
@@ -82,11 +79,19 @@ class Align:
     self.back_frame.after(1, self.back_frame_after)
 
   def destroy_root(self):
+    state = state_manager.get()
+    state_manager.update(state, {
+      "x": self.capture_x,
+      "y": self.capture_y,
+      "size": self.capture_size
+    })
+    self.destroy_back_frame()
     self.root.destroy()
+    print("Root > Destroyed")
 
   def destroy_back_frame(self):
     self.back_frame.destroy()
-    print("Destroyed align")
+    print("Align > Destroyed")
 
   def mouse_1_down(self, event):
     self.top_label.config(
@@ -95,26 +100,24 @@ class Align:
     )
 
   def mouse_1_move(self, event):
-    self.capture_x = self.image_label.winfo_x()
-    self.capture_y = self.image_label.winfo_y()
-    self.capture_size = self.image_label.winfo_width()
-    self.mouse_x = position()[0]
-    self.mouse_y = position()[1]
+    self.capture_x = int(self.image_label.winfo_x())
+    self.capture_y = int(self.image_label.winfo_y())
+    mouse_x = position()[0]
+    mouse_y = position()[1]
 
-    self.move_initial_img_x(self.mouse_x - (self.capture_size / 2))
-    self.move_initial_img_y(self.mouse_y - (self.capture_size / 2))
+    self.move_initial_img_x(mouse_x - (self.capture_size / 2))
+    self.move_initial_img_y(mouse_y - (self.capture_size / 2))
 
   def mouse_1_up(self, event):
     self.save_state()
 
   def save_state(self):
-    with open(Env.state_path, "r", encoding='utf-8') as state_file:
-      state = json.loads(state_file.read())
-      state["x"] = self.capture_x
-      state["y"] = self.capture_y
-      state["size"] = self.capture_size
-      with open(Env.state_path, "w", encoding='utf-8') as state_file:
-        json.dump(state, state_file, ensure_ascii=False, indent=4)
+    state = state_manager.get()
+    state_manager.update(state, {
+      "x": self.capture_x,
+      "y": self.capture_y,
+      "size": self.capture_size
+    })
 
   def key_right(self):
     self.move_initial_img_x(self.capture_x + 1)
@@ -123,6 +126,7 @@ class Align:
     self.move_initial_img_x(self.capture_x - 1)
 
   def move_initial_img_x(self, x):
+    self.capture_x = int(x)
     if x <= 0:
       x = 0
     if x >= Env.res_x - self.capture_size:
@@ -130,12 +134,13 @@ class Align:
     self.image_label.place(x=x + math.floor(self.capture_size / 2))
 
   def key_up(self):
-    self.move_initial_img_y(self.image_label.winfo_y() - 1)
+    self.move_initial_img_y(self.capture_y - 1)
 
   def key_down(self):
-    self.move_initial_img_y(self.image_label.winfo_y() + 1)
+    self.move_initial_img_y(self.capture_y + 1)
 
   def move_initial_img_y(self, y):
+    self.capture_y = int(y)
     if y <= 0:
       y = 0
     if y >= Env.res_y - self.capture_size:
@@ -149,12 +154,10 @@ class Align:
     )
 
   def key_plus(self):
-    self.resize_initial_img(self.image_label.winfo_width() + 2)
+    self.resize_initial_img(self.capture_size + 2)
 
   def key_minus(self):
-    self.resize_initial_img(self.image_label.winfo_width() - 2)
-
-
+    self.resize_initial_img(self.capture_size - 2)
 
   def finish(self):
 
@@ -163,17 +166,23 @@ class Align:
 
     self.take_screenshot()
     self.convert_to_alpha()
+    self.apply_masks()
 
-    pdf_template = pdf_insert_map_img(
-      path.join(Env.index_dir, f"./pdf_templates/{self.pipe_type}_template.pdf"),
+    pdf_process = PdfProcessor(path.join(Env.index_dir, f"./pdf_templates/{self.pipe_type}_template.pdf"))
+    pdf_process.insert_img(
       path.join(Env.appdata_path, f"images/{self.pipe_type}_final.png"),
-      path.join(Env.index_dir, "./images/copyright.png")
+      ( 60, 46, 472, 472 ), 0
     )
+    pdf_process.insert_img(
+      path.join(Env.index_dir, "./images/copyright.png"),
+      ( 60, 510, 210, 9 ), 0
+    )
+    print("Processed PDF")
 
     output_path = self.prompt_user_to_save()
 
     if output_path:
-      pdf_template.save(output_path)
+      pdf_process.pdf.save(output_path)
       ToastNotifier().show_toast(f"Created {path.basename(output_path)} at",
         output_path,
         icon_path=path.join(Env.index_dir, "icon.ico"),
@@ -182,16 +191,20 @@ class Align:
       )
 
   def resize_initial_img(self, size):
+    size = int(size)
+    self.capture_size = size
     if size <= 0 or size > Env.res_x or size > Env.res_y:
       return
     photoimage = ImageTk.PhotoImage(self.initial_img.resize((size, size), Image.LANCZOS))
     self.image_label.config(image=photoimage)
     self.image_label.image = photoimage
-    self.move_initial_img_x(self.capture_x)
-    self.move_initial_img_y(self.capture_y)
+    offset = -1 if size > self.image_label.winfo_width() else 1
+    self.move_initial_img_x(self.capture_x + offset)
+    self.move_initial_img_y(self.capture_y + offset)
 
   def take_screenshot(self):
     Path(Path(self.img_path).parent).mkdir(parents=True, exist_ok=True)
+
     pyautogui.screenshot(self.img_path, (
       self.capture_x, self.capture_y,
       self.capture_size, self.capture_size
@@ -201,14 +214,14 @@ class Align:
 
   def convert_to_alpha(self):
     if not path.exists(self.img_path):
-      raise "No initial iamge found"
+      raise f"No {self.pipe_type} image found"
     img = cv2.imread(self.img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
-    cv2.imwrite(img)
+    cv2.imwrite(self.img_path, img)
 
   def apply_masks(self):
-    img = Image.open(self.img_path)
-    img_size = img.size
+    final_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
+    img = cv2.imread(self.img_path, flags=cv2.IMREAD_UNCHANGED)
     mask_dir_path = path.join(Env.appdata_path, f"images/masks/{self.pipe_type}")
 
     Path(mask_dir_path).mkdir(parents=True, exist_ok=True)
@@ -218,12 +231,12 @@ class Align:
       bgra_bound = bgra_bounds[i]
       masked_img = self.apply_mask(img, bgra_bound)
       print(f"Generated {i} mask")
-      masked_img = cv2.resize(masked_img, (img, img_size), interpolation=cv2.INTER_CUBIC)
+      masked_img = cv2.resize(masked_img, (final_img.width, final_img.height), interpolation=cv2.INTER_CUBIC)
       cv2.imwrite(mask_path, masked_img)
       masked_img = Image.open(mask_path)
-      img.paste(masked_img, (0, 0), masked_img)
+      final_img.paste(masked_img, (0, 0), masked_img)
 
-    img.save(path.join(Env.appdata_path, f"images/{self.pipe_type}_final.png"), "PNG")
+    final_img.save(path.join(Env.appdata_path, f"images/{self.pipe_type}_final.png"), "PNG")
 
   def apply_mask(self, img, bgra_bound):
     mask = cv2.inRange(
@@ -245,6 +258,7 @@ class Align:
     output_path = None
 
     def open_prompt():
+      nonlocal output_path
       state = state_manager.get()
 
       output_path = filedialog.asksaveasfilename(
@@ -252,7 +266,7 @@ class Align:
         title=f"Save {self.pipe_type} PDF file",
         filetypes=[("PDF File", "*.pdf")],
         defaultextension=".pdf",
-        initialfile="CC" if self.pipe_type == "clean" else "DD"
+        initialfile=state["reference"] + (" CC" if self.pipe_type == "clean" else " DD")
       )
       root.destroy()
 
@@ -265,18 +279,27 @@ class Align:
     return output_path
 
   def key_press(self, event):
+    key_events = {
+      27: self.destroy_root,
+      37: self.key_left,
+      38: self.key_up,
+      39: self.key_right,
+      40: self.key_down,
+      107: self.key_plus,
+      109: self.key_minus,
+      13: self.finish
+    }
     try:
-      self.key_events[event.keycode]()
+      key_events[event.keycode]()
     except:
       pass
 
   def back_frame_after(self):
     self.back_frame.focus_force()
     with open(path.join(Env.appdata_path, "state.json"), "r", encoding='utf-8') as state_file:
-      state = json.load(state_file)
-      self.resize_initial_img(state["size"])
+      self.resize_initial_img(self.capture_size)
       self.image_label.place(
         anchor="center",
-        x=state["x"] + (state["size"] / 2),
-        
-        y=state["y"] + (state["size"] / 2))
+        x=self.capture_x + (self.capture_size / 2),
+        y=self.capture_y + (self.capture_size / 2)
+      )

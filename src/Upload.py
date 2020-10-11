@@ -1,99 +1,85 @@
-import sys
-from os import path, remove, getenv
-import pathlib
-import json
-import tkinter as tk
-from tkinter import filedialog as fd
+from os import path, remove
+from tkinter import Tk, filedialog
+from pathlib import Path
 
 from win10toast import ToastNotifier
-import pyautogui
 
-from pdf_processor import extract_map_img as pdf_extract_map_img
-from pdf_processor import reprocess_map_img as pdf_reprocess_map_img
+from src import variables, pdf_processor, state_manager, img_utils
+from src.variables import Env
+from src.pdf_processor import PdfProcessor
+from src.img_utils import crop_img
+from src.reference_menu import ReferenceMenu
+from src.tk_overlay import TkOverlay
 
-res = pyautogui.size()
-index_dir = path.abspath(path.dirname(sys.argv[0]))
-appdata_path = path.join(getenv('APPDATA'), "DW-Piper")
-toaster = ToastNotifier()
+class Upload:
 
-def main():
+  def __init__(self):
 
-  root = tk.Tk()
-  root.withdraw()
+    upload_dir = self.prompt_user_to_open()
 
-  upload_dir = None
+    if not upload_dir:
+      return None
 
-  box_size = int(res[1] / 1.5)
-  default_state = {
-    "x": int((res[0] / 2) - (box_size / 2)),
-    "y": int((res[1] / 2) - (box_size / 2)),
-    "size": box_size
-  }
+    pdf_process = PdfProcessor(upload_dir)
+    img_pix = pdf_process.extract_img(16)
 
-  def open_file_dialog():
-    nonlocal upload_dir
+    img_path = path.join(Env.appdata_path, "images/initial.png")
 
-    state_path = path.join(appdata_path, "state.json")
+    if not img_pix:
+      ToastNotifier().show_toast("Map extraction failed",
+        "Please make sure your pdf is formatted correctly",
+        icon_path=path.join(Env.index_dir, "icon.ico"),
+        duration=3,
+        threaded=True
+      )
+      return None
 
-    if not path.exists(state_path):
-      with open(state_path, "w", encoding='utf-8') as state_file:
-        json.dump(default_state, state_file, ensure_ascii=False, indent=4)
+    Path(path.join(Env.appdata_path, "images")).mkdir(parents=True, exist_ok=True)
+    if path.exists(img_path):
+      remove(img_path)
+    img_pix.writePNG(img_path)
+    crop_img(img_path, 1, 1, img_pix.width, img_pix.height)
 
-    with open(state_path, "r", encoding='utf-8') as state_file:
-      state = json.loads(state_file.read())
+    state = state_manager.get()
+    size = int(Env.res_y / 1.5)
+    state_manager.update(state, {
+      "x": int((Env.res_x / 2) - (size / 2)),
+      "y": int((Env.res_y / 2) - (size / 2)),
+      "size": size
+    })
 
-      upload_dir = fd.askopenfilename(
+    ReferenceMenu(TkOverlay())
+
+    ToastNotifier().show_toast("Map extraction success",
+      "You can now align the image",
+      icon_path=path.join(Env.index_dir, "icon.ico"),
+      duration=3,
+      threaded=True
+    )
+
+  def prompt_user_to_open(self):
+
+    root = Tk()
+    root.withdraw()
+
+    upload_dir = None
+
+    def open_prompt():
+      nonlocal upload_dir
+      state = state_manager.get()
+
+      upload_dir = filedialog.askopenfilename(
         initialdir=state["upload_dir"] if "upload_dir" in state else "/",
         title="Upload a mapping PDF",
         filetypes=[("PDF File", "*.pdf")],
         defaultextension=".pdf"
       )
+      root.destroy()
 
       if upload_dir:
-        state["upload_dir"] = path.dirname(upload_dir)
+        state_manager.update(state, { "upload_dir": path.dirname(upload_dir) })
 
-        with open(state_path, "w", encoding='utf-8') as state_file:
-          json.dump(state, state_file, ensure_ascii=False, indent=4)
+    root.after(1, open_prompt)
+    root.mainloop()
 
-    root.destroy()
-
-  root.after(1, open_file_dialog)
-  root.mainloop()
-
-  if not upload_dir:
-    return
-  map_pix = pdf_extract_map_img(upload_dir)
-
-  if map_pix:
-
-    pathlib.Path(path.join(appdata_path, "images")).mkdir(parents=True, exist_ok=True)
-    if path.exists(path.join(appdata_path, "images/initial.png")):
-      remove(path.join(appdata_path, "images/initial.png"))
-    map_pix.writePNG(path.join(appdata_path, "images/initial.png"))
-    pdf_reprocess_map_img(path.join(appdata_path, "images/initial.png"))
-
-    state_path = path.join(appdata_path, "state.json")
-
-    with open(state_path, "r", encoding='utf-8') as state_file:
-      state = json.loads(state_file.read())
-      state["x"] = default_state["x"]
-      state["y"] = default_state["y"]
-      state["size"] = default_state["size"]
-      with open(state_path, "w", encoding='utf-8') as state_file:
-        json.dump(state, state_file, ensure_ascii=False, indent=4)
-
-    toaster.show_toast("Map extraction success",
-      "You can now align the image",
-      icon_path=path.join(index_dir, "icon.ico"),
-      duration=3,
-      threaded=True
-    )
-
-  else:
-    toaster.show_toast("Map extraction failed",
-      "Please make sure your pdf is formatted correctly",
-      icon_path=path.join(index_dir, "icon.ico"),
-      duration=3,
-      threaded=True
-    )
-
+    return upload_dir
