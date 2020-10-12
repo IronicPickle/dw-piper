@@ -62,10 +62,17 @@ class UpdatePrompt:
     )
     self.button_label.pack(side=TOP, pady=10)
 
+    self.divider_frame = Frame(
+      self.front_frame,
+      bg="white",
+      width=120,
+      height=1
+    )
+    self.divider_frame.pack(side=TOP, pady=(0, 10))
+
     self.button_frame = Label(
       self.front_frame,
-      bg="black",
-      fg="white"
+      bg="black"
     )
     self.button_frame.pack(side=TOP)
 
@@ -94,7 +101,7 @@ class UpdatePrompt:
     print("Root > Destroyed")
 
   def destroy_back_frame(self):
-    self.back_frame.destroy(self)
+    self.back_frame.destroy()
     print("Update Prompt > Destroyed")
 
   def update(self):

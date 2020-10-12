@@ -1,4 +1,4 @@
-from tkinter import Label, Button, LEFT, TOP
+from tkinter import Frame, Label, Button, LEFT, TOP
 
 from src import upload, capture, align_menu
 from src.upload import Upload
@@ -29,10 +29,17 @@ class MainMenu:
     )
     self.button_label.pack(side=TOP)
 
+    self.divider_frame = Frame(
+      self.front_frame,
+      bg="white",
+      width=120,
+      height=1
+    )
+    self.divider_frame.pack(side=TOP, pady=(0, 10))
+
     self.button_frame = Label(
       self.front_frame,
-      bg="black",
-      fg="white"
+      bg="black"
     )
     self.button_frame.pack(side=TOP)
 
