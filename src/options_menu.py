@@ -1,11 +1,11 @@
-from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar
+from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar, FLAT
 
 from src import state_manager
 
-class ReferenceMenu:
+class OptionsMenu:
 
   def __init__(self, tk_overlay):
-    print("Reference Menu > Started")
+    print("Options Menu > Started")
 
     self.reference = StringVar()
     state = state_manager.get()
@@ -45,7 +45,9 @@ class ReferenceMenu:
       bg="black",
       fg="white",
       insertbackground="white",
-      justify=CENTER
+      justify=CENTER,
+      highlightthickness=1,
+      relief=FLAT,
     )
     self.reference_entry.pack(side=TOP, pady=10)
 
@@ -81,11 +83,13 @@ class ReferenceMenu:
 
   def destroy_back_frame(self):
     self.back_frame.destroy()
-    print("Reference Menu > Destroyed")
+    print("Options Menu > Destroyed")
 
   def submit(self):
     state = state_manager.get()
-    state_manager.update(state, { "reference": self.reference.get() })
+    state_manager.update(state, {
+      "reference": self.reference.get()
+    })
     self.root.destroy()
 
   def key_press(self, event):
