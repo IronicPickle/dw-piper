@@ -1,17 +1,24 @@
 from os import path
 from pathlib import Path
-from tkinter import Frame, Label, Button, TOP, LEFT
+from tkinter import Frame, Label, Button, OptionMenu, TOP, LEFT, StringVar, FLAT
 
 from win10toast import ToastNotifier
 
-from src import align, variables
+from src import align, variables, state_manager
 from src.align import Align
-from src.variables import Env
+from src.variables import Env, WATER_COMPANIES
 
 class AlignMenu:
 
   def __init__(self, tk_overlay):
     print("Align Menu > Started")
+
+    self.water_company = StringVar()
+    state = state_manager.get()
+    if "water_company" in state:
+      self.water_company.set(state["water_company"])
+    else:
+      self.water_company.set("United Utilities")
 
     tk_overlay.generate_frames()
 
@@ -42,6 +49,38 @@ class AlignMenu:
       exit()
 
     self.root.bind("<Key>", self.key_press)
+
+    self.water_company_label = Label(
+      self.front_frame,
+      text="Select a Water Company",
+      font=("Courier", 16),
+      pady=10,
+      bg="black",
+      fg="white"
+    )
+    self.water_company_label.pack(side=TOP)
+
+    self.divider_frame = Frame(
+      self.front_frame,
+      bg="white",
+      width=120,
+      height=1
+    )
+    self.divider_frame.pack(side=TOP, pady=(0, 10))
+
+    self.water_company_dropdown = OptionMenu(
+      self.front_frame,
+      self.water_company,
+      *WATER_COMPANIES.keys()
+    )
+    self.water_company_dropdown.config(
+      font=("Courier", 12),
+      bg="black",
+      fg="white",
+      highlightthickness=0,
+      relief=FLAT
+    )
+    self.water_company_dropdown.pack(side=TOP, pady=(0, 20))
 
     self.button_label = Label(
       self.front_frame,
@@ -93,16 +132,18 @@ class AlignMenu:
     print("Root > Destroyed")
 
   def destroy_back_frame(self):
+    state = state_manager.get()
+    state_manager.update(state, { "water_company": self.water_company.get() })
     self.back_frame.destroy()
     print("Align Menu > Destroyed")
 
   def start_clean(self):
     self.destroy_back_frame()
-    Align(self.tk_overlay, "clean")
+    Align(self.tk_overlay, "clean", self.water_company.get())
 
   def start_drainage(self):
     self.destroy_back_frame()
-    Align(self.tk_overlay, "drainage")
+    Align(self.tk_overlay, "drainage", self.water_company.get())
 
   def key_press(self, event):
     key_events = {

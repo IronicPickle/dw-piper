@@ -1,6 +1,5 @@
 from os import path
 from tkinter import Label, TOP, Tk, filedialog
-import json
 import math
 from pathlib import Path
 import pyautogui
@@ -12,16 +11,17 @@ import cv2
 from win10toast import ToastNotifier
 
 from src import variables, pdf_processor, state_manager
-from src.variables import Env, Bounds
+from src.variables import Env, WATER_COMPANIES
 from src.pdf_processor import PdfProcessor
 
 class Align:
 
-  def __init__(self, tk_overlay, pipe_type):
+  def __init__(self, tk_overlay, pipe_type, water_company):
 
     print("Align > Started")
 
     state = state_manager.get()
+    self.water_company = water_company
     self.capture_x = int(state["x"])
     self.capture_y = int(state["y"])
     self.capture_size = int(state["size"])
@@ -35,6 +35,8 @@ class Align:
     self.root = tk_overlay.root
     self.back_frame = tk_overlay.back_frame
     self.front_frame = tk_overlay.front_frame
+
+    self.root.attributes("-alpha", 0.5)
 
 
     self.root.bind("<Key>", self.key_press)
@@ -225,13 +227,17 @@ class Align:
     mask_dir_path = path.join(Env.appdata_path, f"images/masks/{self.pipe_type}")
 
     Path(mask_dir_path).mkdir(parents=True, exist_ok=True)
-    bgra_bounds = Bounds.united_utilities[self.pipe_type]
+    bgra_bounds = WATER_COMPANIES[self.water_company][self.pipe_type]
     for i in bgra_bounds:
       mask_path = path.join(mask_dir_path, f"{i}.png")
       bgra_bound = bgra_bounds[i]
       masked_img = self.apply_mask(img, bgra_bound)
       print(f"Generated {i} mask")
-      masked_img = cv2.resize(masked_img, (final_img.width, final_img.height), interpolation=cv2.INTER_CUBIC)
+      masked_img = cv2.resize(
+        masked_img,
+        (final_img.width, final_img.height),
+        interpolation=cv2.INTER_CUBIC
+      )
       cv2.imwrite(mask_path, masked_img)
       masked_img = Image.open(mask_path)
       final_img.paste(masked_img, (0, 0), masked_img)
@@ -241,8 +247,8 @@ class Align:
   def apply_mask(self, img, bgra_bound):
     mask = cv2.inRange(
       img,
-      np.asarray(bgra_bound),
-      np.asarray(bgra_bound)
+      np.asarray(bgra_bound if type(bgra_bound) == list else bgra_bound[0]),
+      np.asarray(bgra_bound if type(bgra_bound) == list else bgra_bound[1])
     )
     return cv2.bitwise_and(
       img,

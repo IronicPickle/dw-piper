@@ -8,7 +8,7 @@ from src import variables, pdf_processor, state_manager, img_utils
 from src.variables import Env
 from src.pdf_processor import PdfProcessor
 from src.img_utils import crop_img
-from src.reference_menu import ReferenceMenu
+from src.options_menu import OptionsMenu
 from src.tk_overlay import TkOverlay
 
 class Upload:
@@ -48,7 +48,7 @@ class Upload:
       "size": size
     })
 
-    ReferenceMenu(TkOverlay())
+    OptionsMenu(TkOverlay())
 
     ToastNotifier().show_toast("Map extraction success",
       "You can now align the image",

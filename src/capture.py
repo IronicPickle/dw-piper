@@ -7,7 +7,7 @@ from win10toast import ToastNotifier
 
 from src import state_manager, variables
 from src.variables import Env
-from src.reference_menu import ReferenceMenu
+from src.options_menu import OptionsMenu
 
 class Capture:
   mouse_start = {"x": 0, "y": 0}
@@ -141,7 +141,7 @@ class Capture:
       "size": box_size
     })
 
-    ReferenceMenu(self.tk_overlay)
+    OptionsMenu(self.tk_overlay)
 
     print(f"Initial screenshot taken at: {capture_x}, {capture_y}\n  Size: {box_size} x {box_size}")
 

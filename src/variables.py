@@ -1,9 +1,7 @@
 from os import getenv, path
 from sys import argv
-import numpy as np
 
 from pyautogui import size
-import cv2
 
 class Env:
   appdata_path = path.join(getenv("APPDATA"), "DW-Piper")
@@ -11,8 +9,8 @@ class Env:
   res_x = size()[0]
   res_y = size()[1]
 
-class Bounds:
-  united_utilities = {
+WATER_COMPANIES = {
+  "United Utilities": {
     "drainage": {
       "combined": [0, 0, 255, 255],
       "foul": [0, 76, 115, 255],
@@ -27,4 +25,23 @@ class Bounds:
       "concessionary": [255, 122, 0, 255],
       "water_meter": [214, 0, 11, 255]
     }
-  }
+  }, #"Wessex Water": {
+    #"drainage": {
+      #"combined": ([255, 0, 255, 255], [255, 200, 255, 255]),
+      #"foul": ([0, 0, 255, 255], [100, 100, 255, 255]),
+      #"surface": ([255, 112, 0, 255], [255, 165, 95, 255])
+    #}, "clean": {}
+  #}, "Bristol Water": {
+    #"drainage": {},
+    #"clean": {
+      #"water_main_1-meter_in_use": [255, 0, 0, 255],
+      #"water_main_2": [255, 255, 0, 255],
+      #"supply_pipe-private_main": [0, 0, 255, 255],
+      #"abandoned": [157, 157, 157, 255],
+      #"common_pipe": [245, 0, 122, 255],
+      #"hydrant": [0, 178, 0, 255],
+      #"fire_hydrant": [211, 0, 255, 255],
+      #"meter_not_in_use": [84, 0, 255, 255]
+    #}
+  #}
+}
