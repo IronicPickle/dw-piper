@@ -32,8 +32,6 @@ class UpdatePrompt:
     self.root.config(bg="black", highlightthickness=1, highlightbackground="white")
     self.root.minsize(450, 200)
     self.root.geometry('%dx%d+%d+%d' % (450, 200, work_area[2] - 463, work_area[3] - 236))
-    self.root.title("DW Piper")
-    self.root.iconbitmap(path.join(Env.index_dir, "icon.ico"))
 
     self.title_label = Label(
       self.front_frame,

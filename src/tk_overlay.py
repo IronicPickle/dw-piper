@@ -1,4 +1,8 @@
+from os import path
 from tkinter import Tk, Frame
+
+from src import variables
+from src.variables import Env
 
 class TkOverlay:
 
@@ -12,6 +16,8 @@ class TkOverlay:
     self.root.attributes("-fullscreen", True)
     self.root.attributes("-topmost", True)
     self.root.config(bg="black")
+    self.root.title("DW Piper")
+    self.root.iconbitmap(path.join(Env.index_dir, "icon.ico"))
 
     self.back_frame = None
     self.front_frame = None

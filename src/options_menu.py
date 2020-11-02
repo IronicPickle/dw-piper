@@ -18,6 +18,11 @@ class OptionsMenu:
     self.back_frame = tk_overlay.back_frame
     self.front_frame = tk_overlay.front_frame
 
+    self.root.attributes("-fullscreen", False)
+    self.root.attributes("-alpha", 0.9)
+    self.root.config(bg="black", highlightthickness=1, highlightbackground="white")
+    self.root.minsize(450, 200)
+
     self.root.bind("<Key>", self.key_press)
 
     self.button_label = Label(
