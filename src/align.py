@@ -36,6 +36,8 @@ class Align:
     self.back_frame = tk_overlay.back_frame
     self.front_frame = tk_overlay.front_frame
 
+    self.root.attributes("-alpha", 0.5)
+
 
     self.root.bind("<Key>", self.key_press)
 
