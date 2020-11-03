@@ -36,8 +36,8 @@ class Align:
     self.back_frame = tk_overlay.back_frame
     self.front_frame = tk_overlay.front_frame
 
+    self.root.attributes("-fullscreen", True)
     self.root.attributes("-alpha", 0.5)
-
 
     self.root.bind("<Key>", self.key_press)
 
@@ -62,7 +62,7 @@ class Align:
       self.back_frame,
       text="Click and drag to align",
       font=("Courier", 16),
-      bg="black",
+      bg="#212121",
       fg="white",
       pady=0, padx=5
     )
@@ -71,7 +71,7 @@ class Align:
     self.top_info_label = Label(
       self.back_frame,
       font=("Calibri", 12),
-      bg="black",
+      bg="#212121",
       fg="white",
       pady=0,
       padx=5
@@ -81,12 +81,7 @@ class Align:
     self.back_frame.after(1, self.back_frame_after)
 
   def destroy_root(self):
-    state = state_manager.get()
-    state_manager.update(state, {
-      "x": self.capture_x,
-      "y": self.capture_y,
-      "size": self.capture_size
-    })
+    self.save_state()
     self.destroy_back_frame()
     self.root.destroy()
     print("Root > Destroyed")
@@ -156,10 +151,10 @@ class Align:
     )
 
   def key_plus(self):
-    self.resize_initial_img(self.capture_size + 2)
+    self.resize_initial_img(self.capture_size + 2, False)
 
   def key_minus(self):
-    self.resize_initial_img(self.capture_size - 2)
+    self.resize_initial_img(self.capture_size - 2, False)
 
   def finish(self):
 
@@ -187,12 +182,12 @@ class Align:
       pdf_process.pdf.save(output_path)
       ToastNotifier().show_toast(f"Created {path.basename(output_path)} at",
         output_path,
-        icon_path=path.join(Env.index_dir, "icon.ico"),
+        icon_path=path.join(Env.index_dir, "images/icon.ico"),
         duration=3,
         threaded=True
       )
 
-  def resize_initial_img(self, size):
+  def resize_initial_img(self, size, no_offset):
     size = int(size)
     self.capture_size = size
     if size <= 0 or size > Env.res_x or size > Env.res_y:
@@ -201,6 +196,8 @@ class Align:
     self.image_label.config(image=photoimage)
     self.image_label.image = photoimage
     offset = -1 if size > self.image_label.winfo_width() else 1
+    if no_offset:
+      offset = 0
     self.move_initial_img_x(self.capture_x + offset)
     self.move_initial_img_y(self.capture_y + offset)
 
@@ -303,7 +300,7 @@ class Align:
   def back_frame_after(self):
     self.back_frame.focus_force()
     with open(path.join(Env.appdata_path, "state.json"), "r", encoding='utf-8') as state_file:
-      self.resize_initial_img(self.capture_size)
+      self.resize_initial_img(self.capture_size, True)
       self.image_label.place(
         anchor="center",
         x=self.capture_x + (self.capture_size / 2),

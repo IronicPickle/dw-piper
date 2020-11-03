@@ -25,6 +25,9 @@ class Capture:
     self.back_frame = tk_overlay.back_frame
     self.front_frame = tk_overlay.front_frame
 
+    self.root.attributes("-fullscreen", True)
+    self.root.attributes("-alpha", 0.75)
+
     self.root.bind("<Key>", self.key_press)
 
     self.back_frame.bind("<Button-1>", self.mouse_1_down)
@@ -44,7 +47,7 @@ class Capture:
       self.back_frame,
       text="Click and drag to select an area\nor press ESC to cancel",
       font=("Courier", 16),
-      bg="black",
+      bg="#212121",
       fg="white",
       pady=0, padx=5
     )
@@ -54,7 +57,7 @@ class Capture:
       self.selection_frame,
       text="0 x 0",
       font=("Courier", 16),
-      bg="black",
+      bg="#212121",
       fg="white",
       pady=0,
       padx=5
@@ -147,7 +150,7 @@ class Capture:
 
     ToastNotifier().show_toast(f"Screenshot taken at: {capture_x}, {capture_y}",
       f"Size: {box_size} x {box_size}",
-      icon_path=path.join(Env.index_dir, "icon.ico"),
+      icon_path=path.join(Env.index_dir, "images/icon.ico"),
       duration=3,
       threaded=True
     )

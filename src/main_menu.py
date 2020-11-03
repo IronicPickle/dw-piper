@@ -1,9 +1,13 @@
+from os import path
 from tkinter import Frame, Label, Button, LEFT, TOP
+
+from PIL import Image, ImageTk
 
 from src import upload, capture, align_menu
 from src.upload import Upload
 from src.capture import Capture
 from src.align_menu import AlignMenu
+from src.variables import Env
 
 class MainMenu:
 
@@ -11,11 +15,14 @@ class MainMenu:
     print("Main Menu > Started")
 
     tk_overlay.generate_frames()
+    tk_overlay.generate_title()
 
     self.tk_overlay = tk_overlay
     self.root = tk_overlay.root
     self.back_frame = tk_overlay.back_frame
     self.front_frame = tk_overlay.front_frame
+
+    self.root.attributes("-alpha", 1)
 
     self.root.bind("<Key>", self.key_press)
 
@@ -24,7 +31,7 @@ class MainMenu:
       text="Choose an Option",
       font=("Courier", 16),
       pady=10,
-      bg="black",
+      bg="#212121",
       fg="white"
     )
     self.button_label.pack(side=TOP)
@@ -39,7 +46,7 @@ class MainMenu:
 
     self.button_frame = Label(
       self.front_frame,
-      bg="black"
+      bg="#212121"
     )
     self.button_frame.pack(side=TOP)
 
@@ -60,7 +67,7 @@ class MainMenu:
       command=command,
       cursor="hand2",
       bd=0,
-      bg="black",
+      bg="#212121",
       fg="white"
     ).pack(side=LEFT, padx=10)
 

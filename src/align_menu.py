@@ -21,11 +21,15 @@ class AlignMenu:
       self.water_company.set("United Utilities")
 
     tk_overlay.generate_frames()
+    tk_overlay.generate_title()
 
     self.tk_overlay = tk_overlay
     self.root = tk_overlay.root
     self.back_frame = tk_overlay.back_frame
     self.front_frame = tk_overlay.front_frame
+    
+    self.root.attributes("-alpha", 1)
+    self.root.minsize(450, 300)
 
     if not Path(path.join(Env.appdata_path, "images/initial.png")).exists():
       self.destroy_root()
@@ -55,7 +59,7 @@ class AlignMenu:
       text="Select a Water Company",
       font=("Courier", 16),
       pady=10,
-      bg="black",
+      bg="#212121",
       fg="white"
     )
     self.water_company_label.pack(side=TOP)
@@ -75,7 +79,7 @@ class AlignMenu:
     )
     self.water_company_dropdown.config(
       font=("Courier", 12),
-      bg="black",
+      bg="#212121",
       fg="white",
       highlightthickness=0,
       relief=FLAT
@@ -87,7 +91,7 @@ class AlignMenu:
       text="Choose an Option",
       font=("Courier", 16),
       pady=10,
-      bg="black",
+      bg="#212121",
       fg="white"
     )
     self.button_label.pack(side=TOP)
@@ -102,7 +106,7 @@ class AlignMenu:
 
     self.button_frame = Label(
       self.front_frame,
-      bg="black"
+      bg="#212121"
     )
     self.button_frame.pack(side=TOP)
 
@@ -122,7 +126,7 @@ class AlignMenu:
       command=command,
       cursor="hand2",
       bd=0,
-      bg="black",
+      bg="#212121",
       fg="white"
     ).pack(side=LEFT, padx=10)
 

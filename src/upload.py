@@ -28,7 +28,7 @@ class Upload:
     if not img_pix:
       ToastNotifier().show_toast("Map extraction failed",
         "Please make sure your pdf is formatted correctly",
-        icon_path=path.join(Env.index_dir, "icon.ico"),
+        icon_path=path.join(Env.index_dir, "images/icon.ico"),
         duration=3,
         threaded=True
       )
@@ -52,7 +52,7 @@ class Upload:
 
     ToastNotifier().show_toast("Map extraction success",
       "You can now align the image",
-      icon_path=path.join(Env.index_dir, "icon.ico"),
+      icon_path=path.join(Env.index_dir, "images/icon.ico"),
       duration=3,
       threaded=True
     )

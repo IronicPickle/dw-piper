@@ -16,7 +16,7 @@ AppSupportURL={#AppURL}
 AppUpdatesURL={#AppURL}
 DefaultDirName={autopf}\{#AppName}                                               
 DefaultGroupName={#AppName}
-SetupIconFile=".\dist\dw\icon.ico"                                                                                   
+SetupIconFile=".\dist\dw\images\icon.ico"                                                                                   
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputBaseFilename={#AppName} Setup                                                                                               

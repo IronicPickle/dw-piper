@@ -15,7 +15,6 @@ a = Analysis(['./dw.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
-a.datas += [("icon.ico", "./icon.ico", "Data")]
 a.datas += [("version", "./version", "Data")]
 a.datas += Tree("./pdf_templates", prefix="pdf_templates")
 a.datas += Tree("./images", prefix="images")
@@ -32,7 +31,7 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False,
-          icon="./icon.ico",
+          icon="./images/icon.ico",
           manifest=None )
 coll = COLLECT(exe,
                a.binaries,

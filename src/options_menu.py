@@ -12,6 +12,7 @@ class OptionsMenu:
     state_manager.update(state, { "reference": "" })
 
     tk_overlay.generate_frames()
+    tk_overlay.generate_title()
 
     self.tk_overlay = tk_overlay
     self.root = tk_overlay.root
@@ -19,9 +20,7 @@ class OptionsMenu:
     self.front_frame = tk_overlay.front_frame
 
     self.root.attributes("-fullscreen", False)
-    self.root.attributes("-alpha", 0.9)
-    self.root.config(bg="black", highlightthickness=1, highlightbackground="white")
-    self.root.minsize(450, 200)
+    self.root.attributes("-alpha", 1)
 
     self.root.bind("<Key>", self.key_press)
 
@@ -30,7 +29,7 @@ class OptionsMenu:
       text="Input your Reference",
       font=("Courier", 16),
       pady=10,
-      bg="black",
+      bg="#212121",
       fg="white"
     )
     self.button_label.pack(side=TOP)
@@ -47,7 +46,7 @@ class OptionsMenu:
       self.front_frame,
       font=("Courier", 12),
       textvariable=self.reference,
-      bg="black",
+      bg="#212121",
       fg="white",
       insertbackground="white",
       justify=CENTER,
@@ -58,7 +57,7 @@ class OptionsMenu:
 
     self.button_frame = Label(
       self.front_frame,
-      bg="black"
+      bg="#212121"
     )
     self.button_frame.pack(side=TOP)
 
@@ -77,7 +76,7 @@ class OptionsMenu:
       command=command,
       cursor="hand2",
       bd=0,
-      bg="black",
+      bg="#212121",
       fg="white"
     ).pack(side=LEFT, padx=10)
 

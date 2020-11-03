@@ -16,37 +16,28 @@ class UpdatePrompt:
     self.latest_version = latest_version["version"]
 
     tk_overlay.generate_frames()
+    tk_overlay.generate_title()
 
     self.tk_overlay = tk_overlay
     self.root = tk_overlay.root
     self.back_frame = tk_overlay.back_frame
     self.front_frame = tk_overlay.front_frame
 
+    self.root.attributes("-alpha", 1)
+
     self.root.bind("<Key>", self.key_press)
 
+    width, height = self.root.winfo_width(), self.root.winfo_height()
     monitor_info = win32api.GetMonitorInfo(win32api.MonitorFromPoint((0,0)))
     work_area = monitor_info["Work"]
 
-    self.root.attributes("-fullscreen", False)
-    self.root.attributes("-alpha", 0.9)
-    self.root.config(bg="black", highlightthickness=1, highlightbackground="white")
-    self.root.minsize(450, 200)
-    self.root.geometry('%dx%d+%d+%d' % (450, 200, work_area[2] - 463, work_area[3] - 236))
-
-    self.title_label = Label(
-      self.front_frame,
-      text="DW Piper",
-      font=("Courier", 16, "underline"),
-      bg="black",
-      fg="white"
-    )
-    self.title_label.pack(side=TOP)
+    self.root.geometry('%dx%d+%d+%d' % (width, height, work_area[2] - (width + 13), work_area[3] - (height + 36)))
 
     self.version_label = Label(
       self.front_frame,
       text=f"Version: {self.latest_version}",
       font=("Courier", 12),
-      bg="black",
+      bg="#212121",
       fg="white"
     )
     self.version_label.pack(side=TOP, pady=(0, 5))
@@ -55,7 +46,7 @@ class UpdatePrompt:
       self.front_frame,
       text=f"An update is available\nWould you like to install it?",
       font=("Courier", 16),
-      bg="black",
+      bg="#212121",
       fg="white"
     )
     self.button_label.pack(side=TOP, pady=10)
@@ -70,7 +61,7 @@ class UpdatePrompt:
 
     self.button_frame = Label(
       self.front_frame,
-      bg="black"
+      bg="#212121"
     )
     self.button_frame.pack(side=TOP)
 
@@ -89,7 +80,7 @@ class UpdatePrompt:
       command=command,
       cursor="hand2",
       bd=0,
-      bg="black",
+      bg="#212121",
       fg="white"
     ).pack(side=LEFT, padx=10)
 
