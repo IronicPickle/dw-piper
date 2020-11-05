@@ -1,0 +1,29 @@
+1.0.0:
+- Initial release
+
+1.1.0:
+- Added direct PDF image extraction
+- Added direct PDF generation from templates
+- Moved temporary files into Local/Roaming
+- Enabled title bar on update prompt
+
+1.2.0
+- Added options menu for reference number input
+
+1.2.1:
+- Added support for multiple water companies
+- Increased opacity of map overlay
+- Updated legend in template to include communication pipes
+
+1.2.2:
+- Options menu no longer launches fullscreen and has a title bar
+
+1.3.0:
+- Buttons menus no longer launch fullscreen and have title bars
+- Visual overhaul
+- Logo changed
+- Improved accuracy of state coordinates
+
+1.3.1:
+- Added start menu option to launch background
+- Added alternative hotkey to CTRL + ALT + D
