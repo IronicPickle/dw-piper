@@ -14,13 +14,16 @@ class Background:
     thread = Timer(5, lambda: self.update_check_scheduler(None))
     thread.start()
 
-    keyboard.on_release_key("print screen", self.key_print_screen)
-    print("Listening for 'print screen' key release")
+    keyboard.on_release(self.key_on_release)
+    print("Listening for 'CTRL + ALT + D' or 'Print Screen' key release")
     keyboard.wait()
 
-  def key_print_screen(self, key):
-    if key.name == "print screen":
-      print("Detected print screen")
+  def key_on_release(self, key):
+    if key.name == "d" and keyboard.is_pressed("alt") and keyboard.is_pressed("ctrl"):
+      print("Detected 'CTRL + ALT + D' key release")
+      MainMenu(TkOverlay())
+    elif key.name == "print screen":
+      print("Detected 'Print Screen' key release")
       MainMenu(TkOverlay())
 
   def update_check_scheduler(self, latest_version_known):
