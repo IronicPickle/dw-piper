@@ -42,14 +42,31 @@ def compare_versions(latest_version_known):
     if latest_version_known == latest_version:
       print("Already notified user, skipping...")
       return latest_version
+    changelog = get_changelog(latest_version["version"])["changelog"]
     print("Prompting user...")
-    UpdatePrompt(TkOverlay(), latest_version, download_version)
+    UpdatePrompt(TkOverlay(), latest_version, changelog, download_version)
 
   return latest_version
 
 def version_to_int(version):
   version_parts = version.split(".")
   return int("".join(version_parts))
+
+def get_changelog(version):
+
+  url = f"https://lykosgc.uk:81/api/changelog?v={version}"
+
+  try:
+    res = requests.get(url, timeout=10)
+  except:
+    print("Changelog download failed")
+    return None
+
+  if res.status_code == 200:
+    return json.loads(res.content)
+
+  else:
+    print(f"Response Error: {res.status_code}")
 
 def download_version(version, download_finish_callback):
 
@@ -58,7 +75,7 @@ def download_version(version, download_finish_callback):
   try:
     res = requests.get(url, timeout=10)
   except:
-    print("Update check failed")
+    print("Update download failed")
     return None
 
   if res.status_code == 200:
