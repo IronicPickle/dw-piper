@@ -6,6 +6,7 @@ import win32api
 
 from src import variables
 from src.variables import Env
+from src.tk_rightclick_menu import TkRightclickMenu
 
 class TkOverlay:
 
@@ -38,6 +39,19 @@ class TkOverlay:
     self.title_icon_photoimage = ImageTk.PhotoImage(self.title_icon)
     self.title_icon_label = None
     self.title_label = None
+
+    self.tk_rightclick_menu = None
+
+    self.root.bind("<ButtonRelease-3>", self.generate_rightclick_menu)
+    self.root.bind("<ButtonRelease-1>", lambda event: self.destroy_rightclick_menu())
+
+  def generate_rightclick_menu(self, event):
+    self.destroy_rightclick_menu()
+    self.tk_rightclick_menu = TkRightclickMenu(self.back_frame)
+
+  def destroy_rightclick_menu(self):
+    if self.tk_rightclick_menu:
+      self.tk_rightclick_menu.destroy()
 
   def generate_frames(self):
 

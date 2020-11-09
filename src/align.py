@@ -239,7 +239,11 @@ class Align:
     self.capture_size = size
     if size <= 0 or size > Env.res_x or size > Env.res_y:
       return
+    import datetime
+
+    timestamp_before = datetime.datetime.now().microsecond
     initial_photoimage = ImageTk.PhotoImage(self.initial_img.resize((size, size), Image.BILINEAR))
+    timestamp_after = datetime.datetime.now().microsecond
     self.image_label.config(image=initial_photoimage)
     self.image_label.image = initial_photoimage
     offset = -1 if size > self.image_label.winfo_width() else 1

@@ -105,14 +105,14 @@ class UpdatePrompt:
     )
     self.button_frame.pack(side=TOP)
 
-    self.generate_buttons("Update", self.update)
-    self.generate_buttons("Cancel", self.destroy_root)
+    self.generate_button("Update", self.update)
+    self.generate_button("Cancel", self.destroy_root)
 
     self.root.after(1, self.root.focus_force)
 
     self.root.mainloop()
 
-  def generate_buttons(self, name, command):
+  def generate_button(self, name, command):
     Button(
       self.button_frame,
       text=name,

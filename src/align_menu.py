@@ -110,15 +110,15 @@ class AlignMenu:
     )
     self.button_frame.pack(side=TOP)
 
-    self.generate_buttons("Clean", self.start_clean)
-    self.generate_buttons("Drainage", self.start_drainage)
-    self.generate_buttons("Cancel", self.destroy_root)
+    self.generate_button("Clean", self.start_clean)
+    self.generate_button("Drainage", self.start_drainage)
+    self.generate_button("Cancel", self.destroy_root)
 
     self.root.after(1, self.root.focus_force)
 
     self.root.mainloop()
 
-  def generate_buttons(self, name, command):
+  def generate_button(self, name, command):
     Button(
       self.button_frame,
       text=name,

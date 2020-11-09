@@ -50,16 +50,16 @@ class MainMenu:
     )
     self.button_frame.pack(side=TOP)
 
-    self.generate_buttons("Upload", self.start_upload)
-    self.generate_buttons("Capture", self.start_capture)
-    self.generate_buttons("Align", self.start_align)
-    self.generate_buttons("Cancel", self.destroy_root)
+    self.generate_button("Upload", self.start_upload)
+    self.generate_button("Capture", self.start_capture)
+    self.generate_button("Align", self.start_align)
+    self.generate_button("Cancel", self.destroy_root)
 
     self.root.after(1, self.root.focus_force)
 
     self.root.mainloop()
 
-  def generate_buttons(self, name, command):
+  def generate_button(self, name, command):
     Button(
       self.button_frame,
       text=name,

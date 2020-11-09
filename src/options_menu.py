@@ -51,7 +51,7 @@ class OptionsMenu:
       insertbackground="white",
       justify=CENTER,
       highlightthickness=1,
-      relief=FLAT,
+      relief=FLAT
     )
     self.reference_entry.pack(side=TOP, pady=10)
 
@@ -61,14 +61,14 @@ class OptionsMenu:
     )
     self.button_frame.pack(side=TOP)
 
-    self.generate_buttons("Submit", self.submit)
-    self.generate_buttons("Cancel", self.destroy_root)
+    self.generate_button("Submit", self.submit)
+    self.generate_button("Cancel", self.destroy_root)
 
     self.root.after(1, self.reference_entry.focus)
 
     self.root.mainloop()
 
-  def generate_buttons(self, name, command):
+  def generate_button(self, name, command):
     Button(
       self.button_frame,
       text=name,
