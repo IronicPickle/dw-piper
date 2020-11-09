@@ -26,7 +26,7 @@ class Capture:
     self.front_frame = tk_overlay.front_frame
 
     self.root.attributes("-fullscreen", True)
-    self.root.attributes("-alpha", 0.75)
+    self.root.attributes("-alpha", 0.5)
 
     self.root.bind("<Key>", self.key_press)
 
@@ -47,9 +47,9 @@ class Capture:
       self.back_frame,
       text="Click and drag to select an area\nor press ESC to cancel",
       font=("Courier", 16),
-      bg="#212121",
+      bg="black",
       fg="white",
-      pady=0, padx=5
+      pady=10, padx=10
     )
     self.top_label.pack(side=TOP, pady=(100, 0))
 

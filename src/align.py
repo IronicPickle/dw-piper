@@ -1,5 +1,5 @@
 from os import path
-from tkinter import Label, TOP, Tk, filedialog
+from tkinter import Label, Frame, TOP, BOTTOM, RIGHT, LEFT, N, E, S, W, X, Y, BOTH, Tk, filedialog
 import math
 from pathlib import Path
 import pyautogui
@@ -13,6 +13,7 @@ from win10toast import ToastNotifier
 from src import variables, pdf_processor, state_manager
 from src.variables import Env, WATER_COMPANIES
 from src.pdf_processor import PdfProcessor
+from src.tk_resizer import TkResizer
 
 class Align:
 
@@ -41,42 +42,58 @@ class Align:
 
     self.root.bind("<Key>", self.key_press)
 
+    self.image_frame = Frame(
+      self.back_frame,
+      bg="#212121"
+    )
+
+    self.tk_resizer = TkResizer(self.image_frame, self.corner_resize)
+
     self.initial_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
     initial_photoimage = ImageTk.PhotoImage(self.initial_img)
 
     self.image_label = Label(
-      self.back_frame,
+      self.image_frame,
       image=initial_photoimage,
-      bg="white",
+      bg="#212121",
       borderwidth=0,
       cursor="fleur"
     )
     self.image_label.image = initial_photoimage
+    self.image_label.pack()
 
-    self.image_label.bind("<Button-1>", self.mouse_1_down)
     self.image_label.bind("<B1-Motion>", self.mouse_1_move)
     self.image_label.bind("<ButtonRelease-1>", self.mouse_1_up)
-    self.image_label.bind("<Configure>", self.update_top_info_label)
+    self.image_frame.bind("<Configure>", self.update_top_info_label)
 
     self.top_label = Label(
       self.back_frame,
-      text="Click and drag to align",
+      text="Click and drag to align and resize",
       font=("Courier", 16),
-      bg="#212121",
+      bg="black",
       fg="white",
-      pady=0, padx=5
+      padx=10, pady=10
     )
     self.top_label.pack(side=TOP, pady=(100, 0))
 
     self.top_info_label = Label(
       self.back_frame,
       font=("Calibri", 12),
-      bg="#212121",
+      bg="black",
       fg="white",
-      pady=0,
-      padx=5
+      padx=10, pady=5
     )
-    self.top_info_label.pack(side=TOP)
+    self.top_info_label.pack(side=TOP, pady=(5, 0))
+
+    self.right_label = Label(
+      self.back_frame,
+      text="ARROW KEYS - Align\nPLUS - Enlarge\nMINUS - Shrink\n\nENTER - Confirm\nESC - Cancel",
+      font=("Courier", 16),
+      bg="black",
+      fg="white",
+      padx=10, pady=10
+    )
+    self.right_label.pack(side=RIGHT, padx=(0, 50), anchor=N)
 
     self.back_frame.after(1, self.back_frame_after)
 
@@ -90,15 +107,45 @@ class Align:
     self.back_frame.destroy()
     print("Align > Destroyed")
 
-  def mouse_1_down(self, event):
-    self.top_label.config(
-      text="Press ENTER to confirm or ESC to cancel",
-      font=("Courier", 16)
-    )
+  def corner_resize(self, event, corner):
+    mouse_x = position()[0]
+    mouse_y = position()[1]
+
+    corner_x = self.capture_x
+    corner_y = self.capture_y
+    if "w" in corner:
+      corner_x = self.capture_x + self.capture_size
+    if "n" in corner:
+      corner_y = self.capture_y + self.capture_size
+
+    relative_x = mouse_x - corner_x
+    relative_y = mouse_y - corner_y
+    if "w" in corner:
+      relative_x = np.invert(relative_x)
+    if "n" in corner:
+      relative_y = np.invert(relative_y)
+
+    size = relative_x if relative_x > relative_y else relative_y
+    size_difference = self.capture_size - size
+
+    if size < 0:
+      return
+
+    new_x = self.capture_x
+    new_y = self.capture_y
+    if "w" in corner:
+      new_x = self.capture_x + size_difference
+    if "n" in corner:
+      new_y = self.capture_y + size_difference
+
+    self.move_initial_img_x(new_x)
+    self.move_initial_img_y(new_y)
+
+    self.resize_initial_img(size, True)
 
   def mouse_1_move(self, event):
-    self.capture_x = int(self.image_label.winfo_x())
-    self.capture_y = int(self.image_label.winfo_y())
+    self.capture_x = int(self.image_frame.winfo_x())
+    self.capture_y = int(self.image_frame.winfo_y())
     mouse_x = position()[0]
     mouse_y = position()[1]
 
@@ -128,7 +175,7 @@ class Align:
       x = 0
     if x >= Env.res_x - self.capture_size:
       x = Env.res_x - self.capture_size
-    self.image_label.place(x=x + math.floor(self.capture_size / 2))
+    self.image_frame.place(x=x + math.floor(self.capture_size / 2))
 
   def key_up(self):
     self.move_initial_img_y(self.capture_y - 1)
@@ -142,11 +189,11 @@ class Align:
       y = 0
     if y >= Env.res_y - self.capture_size:
       y = Env.res_y - self.capture_size
-    self.image_label.place(y=y + math.floor(self.capture_size / 2))
+    self.image_frame.place(y=y + math.floor(self.capture_size / 2))
 
   def update_top_info_label(self, event):
     self.top_info_label.config(
-      text=f"({self.capture_x}, {self.capture_x}) | " +
+      text=f"({self.capture_x}, {self.capture_y}) | " +
       f"{self.capture_size} x {self.capture_size}"
     )
 
@@ -192,9 +239,9 @@ class Align:
     self.capture_size = size
     if size <= 0 or size > Env.res_x or size > Env.res_y:
       return
-    photoimage = ImageTk.PhotoImage(self.initial_img.resize((size, size), Image.LANCZOS))
-    self.image_label.config(image=photoimage)
-    self.image_label.image = photoimage
+    initial_photoimage = ImageTk.PhotoImage(self.initial_img.resize((size, size), Image.BILINEAR))
+    self.image_label.config(image=initial_photoimage)
+    self.image_label.image = initial_photoimage
     offset = -1 if size > self.image_label.winfo_width() else 1
     if no_offset:
       offset = 0
@@ -301,7 +348,7 @@ class Align:
     self.back_frame.focus_force()
     with open(path.join(Env.appdata_path, "state.json"), "r", encoding='utf-8') as state_file:
       self.resize_initial_img(self.capture_size, True)
-      self.image_label.place(
+      self.image_frame.place(
         anchor="center",
         x=self.capture_x + (self.capture_size / 2),
         y=self.capture_y + (self.capture_size / 2)
