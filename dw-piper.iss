@@ -1,7 +1,7 @@
 #define AppName "DW Piper"
 #define ExeName = "DW-Piper"
 #define AppPublisher "Nathan Rath"
-#define AppURL "https://github.com/IronicPickle"
+#define AppURL "https://github.com/IronicPickle/dw-piper"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -23,13 +23,15 @@ OutputBaseFilename={#AppName} Setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-CloseApplications=force
+CloseApplications=no
 OutputDir=".\output\{#AppVersion}"
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
+Source: ".\dist\dw\{#ExeName}.exe"; DestDir: "{app}"; Flags: ignoreversion; \
+    BeforeInstall: TaskKill('{#ExeName}.exe')
 Source: ".\dist\dw\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
 
 [Icons]
@@ -55,6 +57,13 @@ begin
     exit;
   end;
   Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
+end;
+procedure TaskKill(FileName: String);
+var
+  ResultCode: Integer;
+begin
+    Exec(ExpandConstant('taskkill.exe'), '/F /IM ' + '"' + FileName + '"', '', SW_HIDE,
+     ewWaitUntilTerminated, ResultCode);
 end;
 
 [Run]
