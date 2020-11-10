@@ -28,3 +28,11 @@
 - Added start menu option to launch background
 - Added alternative hotkey 'CTRL + ALT + D'
 - Added changelog support for new releases
+
+1.4.1:
+- Added the ability to resize during alignment using the mouse
+- Added a right click menu for selecting, copying, pasting and cutting
+- Increased opacity of the capture screen
+
+1.4.1:
+- Fixed installer not killing exe correctly
