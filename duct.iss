@@ -1,7 +1,6 @@
 #define AppName "Duct"
 #define ExeName "Duct"    
 #define AppId '{E14EE998-7025-4FC4-8FAE-53E1E0C6D24B}'  
-#define AppVersion = '1.5.0'
 #define AppPublisher "Nathan Rath"
 #define AppURL "https://github.com/IronicPickle/duct"
 
