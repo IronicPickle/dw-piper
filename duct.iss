@@ -1,14 +1,14 @@
 #define AppName "Duct"
 #define ExeName "Duct"    
-#define AppId 'E14EE998-7025-4FC4-8FAE-53E1E0C6D24B'  
-#define AppVersion = '0.0.1'
+#define AppId '{E14EE998-7025-4FC4-8FAE-53E1E0C6D24B}'  
+#define AppVersion = '1.5.0'
 #define AppPublisher "Nathan Rath"
 #define AppURL "https://github.com/IronicPickle/duct"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{{#AppId}}                                                            
+AppId={{#AppId}                                                            
 AppName={#AppName}
 AppVersion={#AppVersion}
 ;AppVerName={#AppName} {#AppVersion}
@@ -67,39 +67,39 @@ begin
      ewWaitUntilTerminated, ResultCode);
 end;
 
-function GetUninstallString(): string;
+function GetRegistryValue(Key: string): string;
 var
-  sUnInstPath: string;
-  sUnInstallString: String;
+  RegistryPath: string;
 begin
   Result := '';
-  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{{{#AppId}}_is1');
-  sUnInstallString := '';
-  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
-    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
-  Result := sUnInstallString;
+  RegistryPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{{#AppId}_is1');
+  if not RegQueryStringValue(HKLM, RegistryPath, Key, Result) then
+    RegQueryStringValue(HKCU, RegistryPath, Key, Result);
 end;
 
-function IsUpgrade(): Boolean;
+function VersionStrToInt(VersionStr: string): Integer;
 begin
-  Result := (GetUninstallString() <> '');
+  StringChangeEx(VersionStr, '.', '', True);
+  Result := StrToInt(VersionStr);
 end;
 
 function CheckOldInstall(): Boolean;
 var
-  V: Integer;
   ResultCode: Integer;
-  sUnInstallString: string;
+  UninstallerPath: string;
 begin
   Result := True;
-  if RegValueExists(HKEY_LOCAL_MACHINE,'Software\Microsoft\Windows\CurrentVersion\Uninstall\{{#AppId}}_is1', 'UninstallString') then
+  if RegValueExists(HKEY_LOCAL_MACHINE,'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppId}_is1', 'DisplayVersion') then
   begin
-    sUnInstallString := GetUninstallString();
-    sUnInstallString := RemoveQuotes(sUnInstallString);
-    if Pos('DW Piper', sUnInstallString) <> 0 then 
+    if VersionStrToInt(GetRegistryValue('DisplayVersion')) < 150 then
     begin
       MsgBox(ExpandConstant('In order to install this update, we must remove the previous installation. Press OK to continue.'), mbInformation, MB_OK);
-      Result := Exec(ExpandConstant(sUnInstallString), '', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);   
+      UninstallerPath := RemoveQuotes(GetRegistryValue('UninstallString'));
+      Exec(ExpandConstant(UninstallerPath), '', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+      if ResultCode <> 0 then
+      begin
+        Result := False;
+      end;  
     end;
   end;
 end;

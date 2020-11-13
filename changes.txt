@@ -29,10 +29,17 @@
 - Added alternative hotkey 'CTRL + ALT + D'
 - Added changelog support for new releases
 
-1.4.1:
+1.4.0:
 - Added the ability to resize during alignment using the mouse
 - Added a right click menu for selecting, copying, pasting and cutting
 - Increased opacity of the capture screen
 
 1.4.1:
 - Fixed installer not killing exe correctly
+
+1.4.2:
+- Uninstaller now removes appdata folder
+
+1.5.0:
+- Changed name to 'Duct'
+- Done some behind the scenes work to handle the name transition
