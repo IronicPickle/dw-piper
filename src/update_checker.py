@@ -5,12 +5,10 @@ import json
 
 import requests
 
-from src import tk_overlay, update_prompt
+from src import tk_overlay, update_prompt, variables
 from src.tk_overlay import TkOverlay
 from src.update_prompt import UpdatePrompt
-
-index_dir = path.abspath(path.dirname(sys.argv[0]))
-appdata_path = path.join(getenv('APPDATA'), "DW-Piper")
+from src.variables import Env
 
 def check_latest_version():
 
@@ -29,7 +27,7 @@ def check_latest_version():
 
 def compare_versions(latest_version_known):
 
-  with open(path.join(index_dir, "version")) as version_file:
+  with open(path.join(Env.index_dir, "version")) as version_file:
     current_version_int = version_to_int(version_file.read())
     version_file.close()
 
@@ -79,7 +77,7 @@ def download_version(version, download_finish_callback):
     return None
 
   if res.status_code == 200:
-    setup_path = path.join(appdata_path, "DW Piper Setup.exe")
+    setup_path = path.join(Env.appdata_path, "Duct.exe")
     with open(setup_path, "wb") as file:
       file.write(res.content)
       file.close()

@@ -4,7 +4,7 @@ from sys import argv
 from pyautogui import size
 
 class Env:
-  appdata_path = path.join(getenv("APPDATA"), "DW-Piper")
+  appdata_path = path.join(getenv("APPDATA"), "Duct")
   index_dir = path.abspath(path.dirname(argv[0]))
   res_x = size()[0]
   res_y = size()[1]

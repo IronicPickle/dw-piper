@@ -23,7 +23,7 @@ class TkOverlay:
     self.root.attributes("-topmost", True)
     self.root.config(highlightthickness=1, highlightbackground="white")
     self.root.minsize(width, height)
-    self.root.title("DW Piper")
+    self.root.title("Duct")
     self.root.iconbitmap(path.join(Env.index_dir, "images/icon.ico"))
     self.root.geometry('%dx%d+%d+%d' % (
       width, height,
@@ -85,8 +85,8 @@ class TkOverlay:
 
     self.title_label = Label(
       self.title_frame,
-      text="DW Piper",
-      font=("Courier", 16),
+      text="Duct",
+      font=("Courier", 20),
       pady=10,
       bg="#212121",
       fg="white"

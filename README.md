@@ -1,4 +1,4 @@
-# DW Piper
+# Duct
 An automated drainage and water mapping tool.
 
 ## Documentation

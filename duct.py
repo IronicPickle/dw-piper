@@ -17,9 +17,9 @@ def main():
   try:
     background_arg = argv.index("--launch-background")
     try:
-      lock = lockfile.LockFile(path.join(Env.appdata_path, "dw-background"))
+      lock = lockfile.LockFile(path.join(Env.appdata_path, "duct-background"))
     except lockfile.LockError:
-      print("DW Piper Background already running")
+      print("Duct Background already running")
       exit()
     Background()
     lock.close()
@@ -29,9 +29,9 @@ def main():
     exit()
 
   try:
-    lock = lockfile.LockFile(path.join(Env.appdata_path, "dw"))
+    lock = lockfile.LockFile(path.join(Env.appdata_path, "duct"))
   except lockfile.LockError:
-    print("DW Piper already running")
+    print("Duct already running")
     exit()
 
 

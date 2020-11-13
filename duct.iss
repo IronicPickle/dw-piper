@@ -1,12 +1,14 @@
-#define AppName "DW Piper"
-#define ExeName = "DW-Piper"
+#define AppName "Duct"
+#define ExeName "Duct"    
+#define AppId 'E14EE998-7025-4FC4-8FAE-53E1E0C6D24B'  
+#define AppVersion = '0.0.1'
 #define AppPublisher "Nathan Rath"
-#define AppURL "https://github.com/IronicPickle/dw-piper"
+#define AppURL "https://github.com/IronicPickle/duct"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{E14EE998-7025-4FC4-8FAE-53E1E0C6D24B}                                                              
+AppId={{{#AppId}}                                                            
 AppName={#AppName}
 AppVersion={#AppVersion}
 ;AppVerName={#AppName} {#AppVersion}
@@ -16,7 +18,7 @@ AppSupportURL={#AppURL}
 AppUpdatesURL={#AppURL}
 DefaultDirName={autopf}\{#AppName}                                               
 DefaultGroupName={#AppName}
-SetupIconFile=".\dist\dw\images\icon.ico"                                                                                   
+SetupIconFile=".\dist\duct\images\icon.ico"                                                                                   
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputBaseFilename={#AppName} Setup                                                                                               
@@ -30,9 +32,7 @@ OutputDir=".\output\{#AppVersion}"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: ".\dist\dw\{#ExeName}.exe"; DestDir: "{app}"; Flags: ignoreversion; \
-    BeforeInstall: TaskKill('{#ExeName}.exe')
-Source: ".\dist\dw\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
+Source: ".\dist\duct\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#ExeName}.exe"; WorkingDir: "{app}"
@@ -58,6 +58,7 @@ begin
   end;
   Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
 end;
+
 procedure TaskKill(FileName: String);
 var
   ResultCode: Integer;
@@ -66,9 +67,53 @@ begin
      ewWaitUntilTerminated, ResultCode);
 end;
 
+function GetUninstallString(): string;
+var
+  sUnInstPath: string;
+  sUnInstallString: String;
+begin
+  Result := '';
+  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{{{#AppId}}_is1');
+  sUnInstallString := '';
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
+  Result := sUnInstallString;
+end;
+
+function IsUpgrade(): Boolean;
+begin
+  Result := (GetUninstallString() <> '');
+end;
+
+function CheckOldInstall(): Boolean;
+var
+  V: Integer;
+  ResultCode: Integer;
+  sUnInstallString: string;
+begin
+  Result := True;
+  if RegValueExists(HKEY_LOCAL_MACHINE,'Software\Microsoft\Windows\CurrentVersion\Uninstall\{{#AppId}}_is1', 'UninstallString') then
+  begin
+    sUnInstallString := GetUninstallString();
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    if Pos('DW Piper', sUnInstallString) <> 0 then 
+    begin
+      MsgBox(ExpandConstant('In order to install this update, we must remove the previous installation. Press OK to continue.'), mbInformation, MB_OK);
+      Result := Exec(ExpandConstant(sUnInstallString), '', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);   
+    end;
+  end;
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  TaskKill('{#ExeName}.exe');
+  TaskKill('DW-Piper.exe');
+  Result := CheckOldInstall();
+end;
+
 [Run]
 Filename: "schtasks"; \
-    Parameters: "/CREATE /F /SC ONLOGON /TN ""DW Piper"" /TR ""'{app}\{#ExeName}.exe' --launch-background"""; \
+    Parameters: "/CREATE /F /SC ONLOGON /TN ""Duct"" /TR ""'{app}\{#ExeName}.exe' --launch-background"""; \
     Flags: runhidden
 Filename: "{app}\{#ExeName}"; \
     Parameters: "--launch-background"; \
@@ -76,7 +121,7 @@ Filename: "{app}\{#ExeName}"; \
 
 [UninstallRun]
 Filename: "schtasks"; \
-    Parameters: "/DELETE /F /TN ""DW Piper"""; \
+    Parameters: "/DELETE /F /TN ""Duct"""; \
     Flags: runhidden
 Filename: "taskkill"; \
     Parameters: "/F /IM ""{#ExeName}.exe"""; \

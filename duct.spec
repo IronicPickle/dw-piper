@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['./dw.py'],
+a = Analysis(['./duct.py'],
              pathex=['.'],
              binaries=[],
              datas=[],
@@ -25,7 +25,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='DW-Piper',
+          name='Duct',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -40,4 +40,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='dw')
+               name='duct')
