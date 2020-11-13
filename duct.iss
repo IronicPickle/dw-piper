@@ -34,6 +34,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: ".\dist\duct\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
 
+[UninstallDelete]
+Type: filesandordirs; Name: "{userappdata}\Duct"
+
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#ExeName}.exe"; WorkingDir: "{app}"
 Name: "{group}\{#AppName} Background"; Filename: "{app}\{#ExeName}.exe"; WorkingDir: {app}; Parameters: "--launch-background"
