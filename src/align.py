@@ -226,7 +226,7 @@ class Align:
     output_path = self.prompt_user_to_save()
 
     if output_path:
-      pdf_process.pdf.save(output_path)
+      pdf_process.pdf.save(output_path, deflate=True)
       ToastNotifier().show_toast(f"Created {path.basename(output_path)} at",
         output_path,
         icon_path=path.join(Env.index_dir, "images/icon.ico"),
