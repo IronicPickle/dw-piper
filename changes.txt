@@ -43,3 +43,6 @@
 1.5.0:
 - Changed name to 'Duct'
 - Done some behind the scenes work to handle the name transition
+
+1.5.1:
+- Generated PDFs are now compressed when saved
