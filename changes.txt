@@ -46,3 +46,7 @@
 
 1.5.1:
 - Generated PDFs are now compressed when saved
+
+1.5.2:
+- Added a slight offset on alignment capture to improve accuracy of asset placement
+- Added support for commercial water meters

@@ -23,7 +23,8 @@ WATER_COMPANIES = {
       "trunk_main": [0, 0, 255, 255],
       "proposed": [122, 245, 165, 255],
       "concessionary": [255, 122, 0, 255],
-      "water_meter": [214, 0, 11, 255]
+      "water_meter": [214, 0, 11, 255],
+      "commercial_meter": [214, 14, 0, 255]
     }
   }, #"Wessex Water": {
     #"drainage": {

@@ -255,8 +255,10 @@ class Align:
   def take_screenshot(self):
     Path(Path(self.img_path).parent).mkdir(parents=True, exist_ok=True)
 
+    print(f"{self.capture_size}, {self.capture_size}")
+
     pyautogui.screenshot(self.img_path, (
-      self.capture_x, self.capture_y,
+      self.capture_x + 1, self.capture_y + 1,
       self.capture_size, self.capture_size
     ))
 
