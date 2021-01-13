@@ -50,3 +50,6 @@
 1.5.2:
 - Added a slight offset on alignment capture to improve accuracy of asset placement
 - Added support for commercial water meters
+
+1.5.3:
+- Added procotol support to allow the launching of duct from the browser
