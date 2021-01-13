@@ -90,10 +90,7 @@ class OptionsMenu:
     print("Options Menu > Destroyed")
 
   def submit(self):
-    state = state_manager.get()
-    state_manager.update(state, {
-      "reference": self.reference.get()
-    })
+    save_ref(self.reference.get())
     self.root.destroy()
 
   def key_press(self, event):
@@ -105,3 +102,9 @@ class OptionsMenu:
       key_events[event.keycode]()
     except:
       pass
+
+def save_ref(ref):
+  state = state_manager.get()
+  state_manager.update(state, {
+    "reference": ref
+  })

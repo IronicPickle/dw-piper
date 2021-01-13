@@ -47,8 +47,8 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
     Check: NeedsAddPath(ExpandConstant('{app}'))
 Root: HKCR; Subkey: "duct"; ValueType: "string"; ValueData: "URL:duct Protocol"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "duct"; ValueType: "string"; ValueName: "URL Protocol"; ValueData: ""
-Root: HKCR; Subkey: "duct\DefaultIcon"; ValueType: "string"; ValueData: "{app}\{#ExeName}.exe,0"
-Root: HKCR; Subkey: "duct\shell\open\command"; ValueType: "string"; ValueData: """{app}\{#ExeName}.exe"" -- ""%1"""
+Root: HKCR; Subkey: "duct\DefaultIcon"; ValueType: "string"; ValueData: "{app}\images\icon.ico,0"
+Root: HKCR; Subkey: "duct\shell\open\command"; ValueType: "string"; ValueData: """{app}\{#ExeName}.exe"" --parse-url ""%1"""
 
 [Code]
 function NeedsAddPath(Param: string): boolean;

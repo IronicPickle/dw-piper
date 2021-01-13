@@ -8,19 +8,20 @@ from src import variables, pdf_processor, state_manager, img_utils
 from src.variables import Env
 from src.pdf_processor import PdfProcessor
 from src.img_utils import crop_img
-from src.options_menu import OptionsMenu
+from src.options_menu import OptionsMenu, save_ref
 from src.tk_overlay import TkOverlay
 
 class Upload:
 
-  def __init__(self):
+  def __init__(self, map_path=None, ref=None):
 
-    upload_dir = self.prompt_user_to_open()
+    if not map_path:
+      map_path = self.prompt_user_to_open()
 
-    if not upload_dir:
+    if not map_path:
       return None
 
-    pdf_process = PdfProcessor(upload_dir)
+    pdf_process = PdfProcessor(map_path)
     img_pix = pdf_process.extract_img(16)
 
     img_path = path.join(Env.appdata_path, "images/initial.png")
@@ -48,10 +49,14 @@ class Upload:
       "size": size
     })
 
-    OptionsMenu(TkOverlay())
+
+    if not ref:
+      ref = OptionsMenu(TkOverlay()).reference.get()
+    else:
+      save_ref(ref)
 
     ToastNotifier().show_toast("Map extraction success",
-      "You can now align the image",
+      f"You can now align the image\nReference: {ref}",
       icon_path=path.join(Env.index_dir, "images/icon.ico"),
       duration=3,
       threaded=True
@@ -62,24 +67,24 @@ class Upload:
     root = Tk()
     root.withdraw()
 
-    upload_dir = None
+    map_path = None
 
     def open_prompt():
-      nonlocal upload_dir
+      nonlocal map_path
       state = state_manager.get()
 
-      upload_dir = filedialog.askopenfilename(
-        initialdir=state["upload_dir"] if "upload_dir" in state else "/",
+      map_path = filedialog.askopenfilename(
+        initialdir=state["map_path"] if "map_path" in state else "/",
         title="Upload a mapping PDF",
         filetypes=[("PDF File", "*.pdf")],
         defaultextension=".pdf"
       )
       root.destroy()
 
-      if upload_dir:
-        state_manager.update(state, { "upload_dir": path.dirname(upload_dir) })
+      if map_path:
+        state_manager.update(state, { "map_path": path.dirname(map_path) })
 
     root.after(1, open_prompt)
     root.mainloop()
 
-    return upload_dir
+    return map_path
