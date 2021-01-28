@@ -51,5 +51,8 @@
 - Added a slight offset on alignment capture to improve accuracy of asset placement
 - Added support for commercial water meters
 
-1.5.3:
+1.6.0:
 - Added procotol support to allow the launching of duct from the browser
+
+1.6.1:
+- Changed the legend for both UU drainage and clean water
