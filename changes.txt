@@ -56,3 +56,6 @@
 
 1.6.1:
 - Changed the legend for both UU drainage and clean water
+
+1.6.1:
+- Slight change to the UU drainage legend
