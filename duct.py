@@ -1,6 +1,7 @@
 from os import path, mkdir
 from sys import argv
 import sys
+import json
 
 from urllib.parse import unquote
 from urllib.request import urlopen
@@ -14,6 +15,7 @@ from src.main_menu import MainMenu
 from src.background import Background
 from src.variables import Env
 from src.upload import Upload
+from src.form import Form
 
 def duct_except_hook(exctype, value, traceback):
   crash_path = path.join(Env.appdata_path, "crash.txt")
@@ -22,7 +24,6 @@ def duct_except_hook(exctype, value, traceback):
     file.close()
   sys.exit(0)
   return
-sys.excepthook = duct_except_hook
 
 def main():
 
@@ -49,7 +50,12 @@ def already_open_error(name):
   )
 
 def handle_args(args):
+  
+  if "--dev" not in args:
+    sys.excepthook = duct_except_hook
+
   if "--parse-url" in args:
+
     index = args.index("--parse-url")
     try:
       param = args[index + 1]
@@ -57,7 +63,9 @@ def handle_args(args):
       print("'parse-url' option must have a parsable url")
     parse_url(param)
     return True
-  elif "--launch-background" in args:
+
+  if "--launch-background" in args:
+
     try:
       lock = lockfile.LockFile(path.join(Env.appdata_path, "duct-background"))
     except lockfile.LockError:
@@ -66,6 +74,7 @@ def handle_args(args):
       return True
     Background()
     lock.close()
+
   return False
 
 def parse_url(url):
@@ -82,7 +91,7 @@ def parse_url(url):
 
   if protocol != "duct":
     return print(f"'parse-url' protocol not found")
-  if address != "upload/":
+  if not protocols.keys().__contains__(address):
     return print(f"'parse-url' address not found")
 
   options = {}
@@ -128,8 +137,23 @@ def mapping_download_error(url):
     threaded=True
   )
 
+def form(options):
+
+  form_type = None
+  data = None
+  if "type" in options: form_type = options["type"]
+  if "data" in options: data = options["data"]
+
+  try:
+    data = json.loads(data)
+  except Exception:
+    None
+
+  Form(form_type, data)
+
 protocols = {
-  "upload/": upload
+  "upload/": upload,
+  "form/": form
 }
 
 

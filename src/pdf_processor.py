@@ -20,3 +20,13 @@ class PdfProcessor:
     ))
 
     self.pdf[page_no].insertImage(map_rect, filename=img_path)
+
+  def find_text(self, text, page_no=0, index=0):
+    rects = self.pdf[page_no].searchFor(text)
+    try:
+      return rects[index]
+    except Exception:
+      return None
+  def insert_text(self, text, point, page_no=0, fontsize=8):
+
+    self.pdf[page_no].insertText(point, text, fontsize=fontsize)
