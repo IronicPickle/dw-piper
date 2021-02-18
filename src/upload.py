@@ -51,7 +51,9 @@ class Upload:
 
 
     if not ref:
-      ref = OptionsMenu(TkOverlay()).reference.get()
+      option_menu = OptionsMenu(TkOverlay())
+      if option_menu.cancelled: return None
+      ref = option_menu.reference.get()
     else:
       save_ref(ref)
 

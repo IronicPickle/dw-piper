@@ -144,7 +144,8 @@ class Capture:
       "size": box_size
     })
 
-    OptionsMenu(self.tk_overlay)
+    options_menu = OptionsMenu(self.tk_overlay)
+    if options_menu.cancelled: return None
 
     print(f"Initial screenshot taken at: {capture_x}, {capture_y}\n  Size: {box_size} x {box_size}")
 

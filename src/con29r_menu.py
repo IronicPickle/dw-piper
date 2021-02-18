@@ -2,16 +2,19 @@ from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar, F
 
 from src import state_manager
 
-class OptionsMenu:
+class Con29RMenu:
 
-  def __init__(self, tk_overlay):
+  def __init__(self, tk_overlay, form_type, road1=""):
     print("Options Menu > Started")
 
-    self.cancelled = False
+    if(form_type is None): return
 
-    self.reference = StringVar()
-    state = state_manager.get()
-    state_manager.update(state, { "reference": "" })
+    self.cancelled = False
+    self.road1 = StringVar()
+    self.road2 = StringVar()
+    self.road3 = StringVar()
+
+    self.road1.set(road1)
 
     tk_overlay.generate_frames()
     tk_overlay.generate_title()
@@ -23,18 +26,19 @@ class OptionsMenu:
 
     self.root.attributes("-fullscreen", False)
     self.root.attributes("-alpha", 1)
+    self.root.minsize(450, 350)
 
     self.root.bind("<Key>", self.key_press)
 
-    self.button_label = Label(
+    self.entry_label = Label(
       self.front_frame,
-      text="Input your Reference",
+      text="Roads to Search",
       font=("Courier", 16),
       pady=10,
       bg="#212121",
       fg="white"
     )
-    self.button_label.pack(side=TOP)
+    self.entry_label.pack(side=TOP)
 
     self.divider_frame = Frame(
       self.front_frame,
@@ -44,18 +48,9 @@ class OptionsMenu:
     )
     self.divider_frame.pack(side=TOP, pady=(0, 10))
 
-    self.reference_entry = Entry(
-      self.front_frame,
-      font=("Courier", 12),
-      textvariable=self.reference,
-      bg="#212121",
-      fg="white",
-      insertbackground="white",
-      justify=CENTER,
-      highlightthickness=1,
-      relief=FLAT
-    )
-    self.reference_entry.pack(side=TOP, pady=10)
+    self.generate_entries(self.road1)
+    self.generate_entries(self.road2)
+    self.generate_entries(self.road3)
 
     self.button_frame = Label(
       self.front_frame,
@@ -82,6 +77,21 @@ class OptionsMenu:
       fg="white"
     ).pack(side=LEFT, padx=10)
 
+  def generate_entries(self, road_variable):
+    self.reference_entry = Entry(
+      self.front_frame,
+      font=("Courier", 12),
+      textvariable=road_variable,
+      bg="#212121",
+      fg="white",
+      insertbackground="white",
+      justify=CENTER,
+      highlightthickness=1,
+      relief=FLAT,
+      width=30
+    )
+    self.reference_entry.pack(side=TOP, pady=10)
+
   def cancel(self):
     self.cancelled = True
     self.destroy_root()
@@ -96,21 +106,14 @@ class OptionsMenu:
     print("Options Menu > Destroyed")
 
   def submit(self):
-    save_ref(self.reference.get())
     self.root.destroy()
 
   def key_press(self, event):
     key_events = {
-      27: self.cancel,
+      27: self.destroy_root,
       13: self.submit
     }
     try:
       key_events[event.keycode]()
     except:
       pass
-
-def save_ref(ref):
-  state = state_manager.get()
-  state_manager.update(state, {
-    "reference": ref
-  })

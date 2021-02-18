@@ -7,6 +7,7 @@ from src import variables, pdf_processor, state_manager, img_utils
 from src.variables import Env
 from src.pdf_processor import PdfProcessor
 from src.tk_overlay import TkOverlay
+from src.con29r_menu import Con29RMenu
 
 class Form:
 
@@ -19,21 +20,32 @@ class Form:
       return None
 
     if form_type == "con29r":
-      self.generate_con29r(data)
+      street = data["property"]["street"]
+      form_menu = Con29RMenu(TkOverlay(), "con29r", street)
+      if form_menu.cancelled: return None
+      roads = (
+        form_menu.road1.get(),
+        form_menu.road2.get(),
+        form_menu.road3.get()
+      )
+      self.generate_con29r(data, roads)
 
-  def generate_con29r(self, data):
+  def generate_con29r(self, data, roads):
 
     pdf_path = path.join(Env.index_dir, f"pdf_templates/con29r_template.pdf")
     pdf_process = PdfProcessor(pdf_path)
+    
+    print("\n".join(roads))
 
     fields = (
-      { "document_id": "Search No:", "value": data["reference"], "location": "after" },
-      { "document_id": "Dated:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after" },
+      { "document_id": "Reference:", "value": data["reference"], "location": "after" },
+      { "document_id": "Dated:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after", "index": 1 },
 
       { "document_id": "Local Authority Name and Address", "value": data["council"], "location": "below" },
 
       { "document_id": "Address of Land/Property", "value": self.format_address(data["property"]), "location": "below" },
-      { "document_id": "UPRN:", "value": data["property"]["uprn"], "location": "below" }
+      { "document_id": "UPRN:", "value": data["property"]["uprn"], "location": "below" },
+      { "document_id": "enquiries 2.1 & 3.6 are required (max 3)", "value": "\n".join(roads), "location": "below" }
     )
 
     self.insert_fields(fields, pdf_process)
@@ -51,8 +63,10 @@ class Form:
       document_id = field["document_id"]
       value = field["value"].upper()
       location = field["location"]
+      index = field["index"] if "index" in field else 0
 
-      rect = pdf_process.find_text(document_id)
+      rect = pdf_process.find_text(document_id, index=index)
+
       if rect is None:
         continue
 
