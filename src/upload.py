@@ -76,6 +76,7 @@ class Upload:
       state = state_manager.get()
 
       map_path = filedialog.askopenfilename(
+        parent=root,
         initialdir=state["map_path"] if "map_path" in state else "/",
         title="Upload a mapping PDF",
         filetypes=[("PDF File", "*.pdf")],

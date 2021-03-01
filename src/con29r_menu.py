@@ -4,10 +4,8 @@ from src import state_manager
 
 class Con29RMenu:
 
-  def __init__(self, tk_overlay, form_type, road1=""):
+  def __init__(self, tk_overlay, road1=""):
     print("Options Menu > Started")
-
-    if(form_type is None): return
 
     self.cancelled = False
     self.road1 = StringVar()
@@ -48,9 +46,9 @@ class Con29RMenu:
     )
     self.divider_frame.pack(side=TOP, pady=(0, 10))
 
-    self.generate_entries(self.road1)
-    self.generate_entries(self.road2)
-    self.generate_entries(self.road3)
+    self.entry_1 = self.generate_entries(self.road1)
+    self.entry_2 =self.generate_entries(self.road2)
+    self.entry_3 =self.generate_entries(self.road3)
 
     self.button_frame = Label(
       self.front_frame,
@@ -61,7 +59,7 @@ class Con29RMenu:
     self.generate_button("Submit", self.submit)
     self.generate_button("Cancel", self.cancel)
 
-    self.root.after(1, self.reference_entry.focus)
+    self.root.after(1, self.entry_2.focus)
 
     self.root.mainloop()
 
@@ -78,7 +76,7 @@ class Con29RMenu:
     ).pack(side=LEFT, padx=10)
 
   def generate_entries(self, road_variable):
-    self.reference_entry = Entry(
+    entry = Entry(
       self.front_frame,
       font=("Courier", 12),
       textvariable=road_variable,
@@ -90,7 +88,8 @@ class Con29RMenu:
       relief=FLAT,
       width=30
     )
-    self.reference_entry.pack(side=TOP, pady=10)
+    entry.pack(side=TOP, pady=10)
+    return entry
 
   def cancel(self):
     self.cancelled = True

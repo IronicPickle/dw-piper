@@ -318,6 +318,7 @@ class Align:
       state = state_manager.get()
 
       output_path = filedialog.asksaveasfilename(
+        parent=root,
         initialdir=state["save_dir"] if "save_dir" in state else "/",
         title=f"Save {self.pipe_type} PDF file",
         filetypes=[("PDF File", "*.pdf")],

@@ -1,7 +1,9 @@
 from os import path
 from datetime import datetime
+from tkinter import Tk, filedialog
 
 from win10toast import ToastNotifier
+import fitz
 
 from src import variables, pdf_processor, state_manager, img_utils
 from src.variables import Env
@@ -19,40 +21,142 @@ class Form:
     if not data:
       return None
 
+    self.form_type = form_type
+    self.data = data
+
     if form_type == "con29r":
       street = data["property"]["street"]
-      form_menu = Con29RMenu(TkOverlay(), "con29r", street)
+      form_menu = Con29RMenu(TkOverlay(), street)
       if form_menu.cancelled: return None
       roads = (
         form_menu.road1.get(),
         form_menu.road2.get(),
         form_menu.road3.get()
       )
-      self.generate_con29r(data, roads)
+      self.generate_con29r(roads)
+    elif form_type == "llc1":
+      self.generate_llc1()
+    elif form_type == "con29o":
+      self.generate_con29o()
+      
 
-  def generate_con29r(self, data, roads):
+  def generate_con29r(self, roads):
 
-    pdf_path = path.join(Env.index_dir, f"pdf_templates/con29r_template.pdf")
-    pdf_process = PdfProcessor(pdf_path)
-    
-    print("\n".join(roads))
+    pdf_path = path.join(Env.index_dir, "pdf_templates/con29r_template.pdf")
+    self.pdf_process = PdfProcessor(pdf_path)
+
+    data = self.data
+
+    uprn = data["property"]["uprn"]
+    if uprn == "Not validated": uprn = ""
 
     fields = (
       { "document_id": "Reference:", "value": data["reference"], "location": "after" },
       { "document_id": "Dated:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after", "index": 1 },
 
-      { "document_id": "Local Authority Name and Address", "value": data["council"], "location": "below" },
+      { "document_id": "Local Authority Name and Address", "value": self.get_spliced_council_name(), "location": "below" },
 
       { "document_id": "Address of Land/Property", "value": self.format_address(data["property"]), "location": "below" },
-      { "document_id": "UPRN:", "value": data["property"]["uprn"], "location": "below" },
+      { "document_id": "UPRN:", "value": uprn, "location": "below" },
       { "document_id": "enquiries 2.1 & 3.6 are required (max 3)", "value": "\n".join(roads), "location": "below" }
     )
 
-    self.insert_fields(fields, pdf_process)
+    self.insert_fields(fields, self.pdf_process)
 
-    save_dir = f"C:/Users/test/Desktop/CON29R {data['reference']}.pdf"
-    pdf_process.pdf.save(save_dir, deflate=True)
-    self.form_generated_notification("Con29R", save_dir)
+    self.save_pdf()
+
+  def generate_llc1(self):
+
+    pdf_path = path.join(Env.index_dir, "pdf_templates/llc1_template.pdf")
+    self.pdf_process = PdfProcessor(pdf_path)
+
+    data = self.data
+
+    fields = (
+      { "document_id": "Reference:", "value": data["reference"], "location": "after" },
+      { "document_id": "Date:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after" },
+
+      { "document_id": "Insert name and address of registering authority in space below", "value": self.get_spliced_council_name(), "location": "below" },
+
+      { "document_id": "Description of land sufficient to enable it to be identified.", "value": self.format_address(data["property"]), "location": "below" }
+    )
+
+    self.insert_fields(fields, self.pdf_process)
+
+    self.save_pdf()
+      
+  def generate_con29o(self):
+
+    pdf_path = path.join(Env.index_dir, "pdf_templates/con29o_template.pdf")
+    self.pdf_process = PdfProcessor(pdf_path)
+
+    data = self.data
+    enquiries = self.get_enquiries()
+
+    fields = [
+      { "document_id": "Reference:", "value": data["reference"], "location": "after" },
+      { "document_id": "Date:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after" },
+
+      { "document_id": "Council Name", "value": self.get_spliced_council_name(), "location": "below" },
+
+      { "document_id": "Address of the land/property", "value": self.format_address(data["property"]), "location": "below" }
+    ]
+
+    for _, enquiry in enumerate(enquiries):
+      fields.append({
+        "document_id": f"{enquiry}.", "value": "X     ", "location": "before"
+      })
+
+    self.insert_fields(fields, self.pdf_process)
+
+    self.save_pdf()
+
+  def get_spliced_council_name(self):
+    name = self.data["council"]
+    if name.lower().__contains__("(formerly"):
+      index = name.index("(formerly")
+      name = name[0:index]
+    return name
+
+  def get_enquiries(self):
+    products = self.data["products"]
+    enquiries = []
+    for _, product in enumerate(products):
+      name = product["name"]
+      if name.__contains__("Enquiry"):
+        try:
+          enquiries.append(int(name[8:10]))
+        except Exception:
+          continue
+    return enquiries
+
+  def save_pdf(self):
+    save_dir = self.prompt_user_to_save()
+    if len(save_dir) == 0: return None
+    self.pdf_process.pdf.save(save_dir, deflate=True)
+    self.form_generated_notification(self.form_type.upper(), save_dir)
+
+  def prompt_user_to_save(self):
+
+    root = Tk()
+    root.withdraw()
+
+    output_path = None
+
+    def open_prompt():
+      nonlocal output_path
+
+      output_path = filedialog.asksaveasfilename(
+        parent=root,
+        title=f"Save {self.form_type.upper()} PDF file",
+        filetypes=[("PDF File", "*.pdf")],
+        defaultextension=".pdf",
+        initialfile=f"{self.data['reference']} {self.form_type.upper()}"
+      )
+
+    open_prompt()
+
+    return output_path
 
   address_keys = (
     "flatNumber", "houseName", "houseNumber", "street", "addressLine2", "locality", "town", "county", "postCode"
@@ -72,7 +176,10 @@ class Form:
 
       point = ( rect.x1 + 2, rect.y1 - 3 )
       if location == "below":
-        point = ( rect.x0, rect.y1 + rect.height - 5 )
+        point = ( rect.x0, rect.y1 + rect.height )
+      elif location == "before":
+        text_length = fitz.getTextlength(value, fontsize=8)
+        point = ( rect.x1 - rect.width - text_length, rect.y1 - 3 )
 
       pdf_process.insert_text(value, point)
 
@@ -81,7 +188,7 @@ class Form:
     for _, address_key in enumerate(self.address_keys):
       value = propertyInfo[address_key]
       if(len(value) > 0):
-        if(("flatNumber", "houseName", "houseNumber", "street").__contains__(address_key)):
+        if(("flatNumber", "houseName", "houseNumber").__contains__(address_key)):
           address += f"{value} "
         else:
           address += f"{value},\n"
