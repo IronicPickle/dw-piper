@@ -91,7 +91,6 @@ class Form:
     self.pdf_process = PdfProcessor(pdf_path)
 
     data = self.data
-    enquiries = self.get_enquiries()
 
     fields = [
       { "document_id": "Reference:", "value": data["reference"], "location": "after" },
@@ -102,7 +101,7 @@ class Form:
       { "document_id": "Address of the land/property", "value": self.format_address(data["property"]), "location": "below" }
     ]
 
-    for _, enquiry in enumerate(enquiries):
+    for _, enquiry in enumerate(data["enquiries"]):
       fields.append({
         "document_id": f"{enquiry}.", "value": "X     ", "location": "before"
       })
@@ -117,18 +116,6 @@ class Form:
       index = name.index("(formerly")
       name = name[0:index]
     return name
-
-  def get_enquiries(self):
-    products = self.data["products"]
-    enquiries = []
-    for _, product in enumerate(products):
-      name = product["name"]
-      if name.__contains__("Enquiry"):
-        try:
-          enquiries.append(int(name[8:10]))
-        except Exception:
-          continue
-    return enquiries
 
   def save_pdf(self):
     save_dir = self.prompt_user_to_save()
