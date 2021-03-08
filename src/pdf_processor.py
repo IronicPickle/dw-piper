@@ -27,6 +27,11 @@ class PdfProcessor:
       return rects[index]
     except Exception:
       return None
+
   def insert_text(self, text, point, page_no=0, fontsize=8):
 
     self.pdf[page_no].insertText(point, text, fontsize=fontsize)
+
+  def insert_textbox(self, text, rect, page_no=0, fontsize=8):
+
+    self.pdf[page_no].insertTextbox(rect, text, fontsize=fontsize)
