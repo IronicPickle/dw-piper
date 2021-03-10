@@ -10,6 +10,7 @@ from src.variables import Env
 from src.pdf_processor import PdfProcessor
 from src.tk_overlay import TkOverlay
 from src.con29r_menu import Con29RMenu
+from src.confirm_menu import ConfirmMenu
 
 class Form:
 
@@ -23,6 +24,9 @@ class Form:
 
     self.form_type = form_type
     self.data = data
+
+    confirm_menu = ConfirmMenu(TkOverlay(), f"Generate {form_type.upper()} Form")
+    if confirm_menu.cancelled: return None
 
     if form_type == "con29r":
       street = data["property"]["street"]
