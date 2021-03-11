@@ -12,7 +12,7 @@ from src.variables import Env
 
 def check_latest_version():
 
-  url = "https://lykosgc.uk:81/api/latestVersion"
+  url = "https://update.lykos.uk/api/latestVersion"
 
   try:
     res = requests.get(url, timeout=10)

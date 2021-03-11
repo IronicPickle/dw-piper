@@ -59,3 +59,8 @@
 
 1.6.1:
 - Slight change to the UU drainage legend
+
+1.7.0:
+- Improved CLI flexibility (Added --dev and --parse-url options)
+- Added support for Offical Search form generation (Only accessible via protocol)
+- Changed update server over to new domain

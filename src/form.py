@@ -65,7 +65,7 @@ class Form:
       { "document_id": "enquiries 2.1 & 3.6 are required (max 3)", "value": "\n".join(roads), "location": "below" }
     )
 
-    self.insert_fields(fields, self.pdf_process)
+    self.insert_fields(fields, "con29r", self.pdf_process)
 
     self.save_pdf()
 
@@ -85,7 +85,7 @@ class Form:
       { "document_id": "Description of land sufficient to enable it to be identified.", "value": self.format_address(data["property"]), "location": "below" }
     )
 
-    self.insert_fields(fields, self.pdf_process)
+    self.insert_fields(fields, "llc1", self.pdf_process)
 
     self.save_pdf()
       
@@ -97,20 +97,20 @@ class Form:
     data = self.data
 
     fields = [
-      { "document_id": "Reference:", "value": data["reference"], "location": "after" },
-      { "document_id": "Date:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after" },
+      { "document_id": "Search No:", "value": data["reference"], "location": "after" },
+      { "document_id": "Dated:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after" },
 
-      { "document_id": "Council Name", "value": self.get_spliced_council_name(), "location": "below" },
+      { "document_id": "Local authority name and address:", "value": self.get_spliced_council_name(), "location": "below" },
 
-      { "document_id": "Address of the land/property", "value": self.format_address(data["property"]), "location": "below" }
+      { "document_id": "Address of the land/property:", "value": self.format_address(data["property"]), "location": "below" }
     ]
 
     for _, enquiry in enumerate(data["enquiries"]):
       fields.append({
-        "document_id": f"{enquiry}.", "value": "X     ", "location": "before"
+        "document_id": f"{enquiry}.", "value": "X      ", "location": "before"
       })
 
-    self.insert_fields(fields, self.pdf_process)
+    self.insert_fields(fields, "con29o", self.pdf_process)
 
     self.save_pdf()
 
@@ -153,7 +153,7 @@ class Form:
     "flatNumber", "houseName", "houseNumber", "street", "addressLine2", "locality", "town", "county", "postCode"
   )
 
-  def insert_fields(self, fields, pdf_process):
+  def insert_fields(self, fields, form_type, pdf_process):
     for _, field in enumerate(fields):
       document_id = field["document_id"]
       value = field["value"].upper()
@@ -165,14 +165,23 @@ class Form:
       if rect is None:
         continue
 
-      point = ( rect.x1 + 2, rect.y1 - 3 )
+      max_width = 0
+      if form_type == "con29r":
+        max_width = 200
+      elif form_type == "llc1":
+        max_width = 200
+      elif form_type == "con29o":
+        max_width = 175
+      
+      point = ( rect.x1 + 2, rect.y0 )
       if location == "below":
-        point = ( rect.x0, rect.y1 + rect.height )
+        point = ( rect.x0, rect.y0 + rect.height )
       elif location == "before":
         text_length = fitz.getTextlength(value, fontsize=8)
-        point = ( rect.x1 - rect.width - text_length, rect.y1 - 3 )
+        point = ( rect.x1 - rect.width - text_length, rect.y0 )
 
-      pdf_process.insert_text(value, point)
+      rect = fitz.Rect(point[0], point[1], point[0] + max_width, point[1] + 200)
+      pdf_process.insert_textbox(value, rect)
 
   def format_address(self, propertyInfo):
     address = ""
