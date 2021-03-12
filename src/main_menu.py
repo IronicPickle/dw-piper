@@ -7,6 +7,7 @@ from src import upload, capture, align_menu
 from src.upload import Upload
 from src.capture import Capture
 from src.align_menu import AlignMenu
+from src.map import Map
 from src.variables import Env
 
 class MainMenu:
@@ -53,6 +54,7 @@ class MainMenu:
     self.generate_button("Upload", self.start_upload)
     self.generate_button("Capture", self.start_capture)
     self.generate_button("Align", self.start_align)
+    self.generate_button("Map", self.start_map)
     self.generate_button("Cancel", self.destroy_root)
 
     self.root.after(1, self.root.focus_force)
@@ -92,12 +94,17 @@ class MainMenu:
     self.destroy_back_frame()
     AlignMenu(self.tk_overlay)
 
+  def start_map(self):
+    self.destroy_back_frame()
+    Map(self.tk_overlay)
+
   def key_press(self, event):
     key_events = {
       27: self.destroy_root,
       85: self.start_upload,
       67: self.start_capture,
-      65: self.start_align
+      65: self.start_align,
+      77: self.start_map
     }
     try:
       key_events[event.keycode]()

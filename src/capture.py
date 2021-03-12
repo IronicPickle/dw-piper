@@ -1,4 +1,4 @@
-from os import path
+from os import path, replace, remove
 from pathlib import Path
 from tkinter import Frame, Label, TOP
 
@@ -125,27 +125,38 @@ class Capture:
     self.coords_label.place(x=box_size / 2, y=box_size / 2)
 
   def mouse_1_up(self, event):
+
     capture_x = self.selection_frame.winfo_x()
     capture_y = self.selection_frame.winfo_y()
     box_size = self.selection_frame.winfo_width()
     self.root.withdraw()
+
     Path(path.join(Env.appdata_path, "images")).mkdir(parents=True, exist_ok=True)
-    pyautogui.screenshot(path.join(Env.appdata_path, "images/initial.png"), (
+    temp_initial_path = path.join(Env.appdata_path, "images/initial_temp.png")
+    pyautogui.screenshot(temp_initial_path, (
       capture_x, capture_y,
       box_size, box_size
     ))
+
     self.destroy_back_frame()
     self.root.deiconify()
+
+    options_menu = OptionsMenu(self.tk_overlay)
+    if options_menu.cancelled:
+      if(path.exists(temp_initial_path)):
+        remove(temp_initial_path)
+      return None
+
+    initial_path = path.join(Env.appdata_path, "images/initial.png")
+    if(path.exists(temp_initial_path)):
+      replace(temp_initial_path, initial_path)
 
     state = state_manager.get()
     state_manager.update(state, {
       "x": int((Env.res_x / 2) - (box_size / 2)),
       "y": int((Env.res_y / 2) - (box_size / 2)),
-      "size": box_size
+      "size": box_size, "rotation": 0
     })
-
-    options_menu = OptionsMenu(self.tk_overlay)
-    if options_menu.cancelled: return None
 
     print(f"Initial screenshot taken at: {capture_x}, {capture_y}\n  Size: {box_size} x {box_size}")
 

@@ -46,7 +46,7 @@ class Upload:
     state_manager.update(state, {
       "x": int((Env.res_x / 2) - (size / 2)),
       "y": int((Env.res_y / 2) - (size / 2)),
-      "size": size
+      "size": size, "rotation": 0
     })
 
 
