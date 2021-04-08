@@ -55,8 +55,8 @@ class Form:
     if uprn == "Not validated": uprn = ""
 
     fields = (
-      { "document_id": "Reference:", "value": data["reference"], "location": "after" },
-      { "document_id": "Dated:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after", "index": 1 },
+      { "document_id": "Reference:", "value": f"  {data['reference']}", "location": "after" },
+      { "document_id": "Dated:", "value": f"  {datetime.today().strftime('%d/%m/%Y')}", "location": "after", "index": 1 },
 
       { "document_id": "Local Authority Name and Address", "value": self.get_spliced_council_name(), "location": "below" },
 
@@ -77,8 +77,8 @@ class Form:
     data = self.data
 
     fields = (
-      { "document_id": "Reference:", "value": data["reference"], "location": "after" },
-      { "document_id": "Date:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after" },
+      { "document_id": "Reference:", "value": f"  {data['reference']}", "location": "after" },
+      { "document_id": "Date:", "value": f"  {datetime.today().strftime('%d/%m/%Y')}", "location": "after" },
 
       { "document_id": "Insert name and address of registering authority in space below", "value": self.get_spliced_council_name(), "location": "below" },
 
@@ -97,8 +97,8 @@ class Form:
     data = self.data
 
     fields = [
-      { "document_id": "Search No:", "value": data["reference"], "location": "after" },
-      { "document_id": "Dated:", "value": datetime.today().strftime("%d/%m/%Y"), "location": "after" },
+      { "document_id": "Reference:", "value": f"        {data['reference']}", "location": "after" },
+      { "document_id": "Dated:", "value": f"               {datetime.today().strftime('%d/%m/%Y')}", "location": "after", "index": 1 },
 
       { "document_id": "Local authority name and address:", "value": self.get_spliced_council_name(), "location": "below" },
 
@@ -107,7 +107,7 @@ class Form:
 
     for _, enquiry in enumerate(data["enquiries"]):
       fields.append({
-        "document_id": f"{enquiry}.", "value": "X      ", "location": "before"
+        "document_id": f"{enquiry}.", "value": "X     ", "location": "before"
       })
 
     self.insert_fields(fields, "con29o", self.pdf_process)
@@ -166,22 +166,26 @@ class Form:
         continue
 
       max_width = 0
+      fontsize = 10
       if form_type == "con29r":
+        fontsize = 10
         max_width = 200
       elif form_type == "llc1":
+        fontsize = 9
         max_width = 200
       elif form_type == "con29o":
+        fontsize = 10
         max_width = 175
       
       point = ( rect.x1 + 2, rect.y0 )
       if location == "below":
         point = ( rect.x0, rect.y0 + rect.height )
       elif location == "before":
-        text_length = fitz.getTextlength(value, fontsize=8)
-        point = ( rect.x1 - rect.width - text_length, rect.y0 )
+        text_length = fitz.getTextlength(value, fontsize=fontsize)
+        point = ( rect.x1 - rect.width - text_length, rect.y0 - 1 )
 
       rect = fitz.Rect(point[0], point[1], point[0] + max_width, point[1] + 200)
-      pdf_process.insert_textbox(value, rect)
+      pdf_process.insert_textbox(value, rect, fontsize=fontsize)
 
   def format_address(self, propertyInfo):
     address = ""

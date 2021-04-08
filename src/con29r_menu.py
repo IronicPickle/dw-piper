@@ -4,15 +4,16 @@ from src import state_manager
 
 class Con29RMenu:
 
-  def __init__(self, tk_overlay, road1=""):
+  def __init__(self, tk_overlay, default_road=""):
     print("Options Menu > Started")
 
     self.cancelled = False
+    self.default_road = StringVar()
     self.road1 = StringVar()
     self.road2 = StringVar()
     self.road3 = StringVar()
 
-    self.road1.set(road1)
+    self.default_road.set(default_road)
 
     tk_overlay.generate_frames()
     tk_overlay.generate_title()
@@ -24,7 +25,7 @@ class Con29RMenu:
 
     self.root.attributes("-fullscreen", False)
     self.root.attributes("-alpha", 1)
-    self.root.minsize(450, 350)
+    self.root.minsize(450, 400)
 
     self.root.bind("<Key>", self.key_press)
 
@@ -46,6 +47,7 @@ class Con29RMenu:
     )
     self.divider_frame.pack(side=TOP, pady=(0, 10))
 
+    self.entry_0 = self.generate_entries(self.default_road, "readonly")
     self.entry_1 = self.generate_entries(self.road1)
     self.entry_2 =self.generate_entries(self.road2)
     self.entry_3 =self.generate_entries(self.road3)
@@ -75,18 +77,19 @@ class Con29RMenu:
       fg="white"
     ).pack(side=LEFT, padx=10)
 
-  def generate_entries(self, road_variable):
+  def generate_entries(self, road_variable, state="normal"):
     entry = Entry(
       self.front_frame,
       font=("Courier", 12),
       textvariable=road_variable,
       bg="#212121",
-      fg="white",
+      fg="white" if state == "normal" else "black",
       insertbackground="white",
       justify=CENTER,
       highlightthickness=1,
       relief=FLAT,
-      width=30
+      width=30,
+      state=state
     )
     entry.pack(side=TOP, pady=10)
     return entry
