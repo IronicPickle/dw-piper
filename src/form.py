@@ -166,26 +166,22 @@ class Form:
         continue
 
       max_width = 0
-      fontsize = 10
       if form_type == "con29r":
-        fontsize = 10
         max_width = 200
       elif form_type == "llc1":
-        fontsize = 9
         max_width = 200
       elif form_type == "con29o":
-        fontsize = 10
         max_width = 175
       
       point = ( rect.x1 + 2, rect.y0 )
       if location == "below":
         point = ( rect.x0, rect.y0 + rect.height )
       elif location == "before":
-        text_length = fitz.getTextlength(value, fontsize=fontsize)
+        text_length = fitz.getTextlength(value, fontsize=9)
         point = ( rect.x1 - rect.width - text_length, rect.y0 - 1 )
 
       rect = fitz.Rect(point[0], point[1], point[0] + max_width, point[1] + 200)
-      pdf_process.insert_textbox(value, rect, fontsize=fontsize)
+      pdf_process.insert_textbox(value, rect, fontsize=9)
 
   def format_address(self, propertyInfo):
     address = ""
