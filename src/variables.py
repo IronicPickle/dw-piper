@@ -8,6 +8,7 @@ class Env:
   index_dir = path.abspath(path.dirname(argv[0]))
   res_x = size()[0]
   res_y = size()[1]
+  update_server_address = "https://update.lykos.uk/"
 
 WATER_COMPANIES = {
   "United Utilities": {

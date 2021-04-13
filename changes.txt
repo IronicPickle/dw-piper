@@ -69,3 +69,6 @@
 - Fixed Con29O Form generation issue
 - Adjusted form generation formatting
 - Moved street to its own readonly field in the Con29R Form Menu
+
+1.7.2:
+- Fixed update server domain issue that causes update checks to fail

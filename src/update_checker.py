@@ -12,7 +12,7 @@ from src.variables import Env
 
 def check_latest_version():
 
-  url = "https://update.lykos.uk/api/latestVersion"
+  url = f"{Env.update_server_address}api/latestVersion"
 
   try:
     res = requests.get(url, timeout=10)
@@ -21,6 +21,7 @@ def check_latest_version():
     return None
 
   if res.status_code == 200:
+    
     return json.loads(res.content)
   else:
     print(f"Response Error: {res.status_code}")
@@ -52,7 +53,7 @@ def version_to_int(version):
 
 def get_changelog(version):
 
-  url = f"https://lykosgc.uk:81/api/changelog?v={version}"
+  url = f"{Env.update_server_address}api/changelog?v={version}"
 
   try:
     res = requests.get(url, timeout=10)
@@ -68,7 +69,7 @@ def get_changelog(version):
 
 def download_version(version, download_finish_callback):
 
-  url = f"https://lykosgc.uk:81/api/download?v={version}"
+  url = f"{Env.update_server_address}api/download?v={version}"
 
   try:
     res = requests.get(url, timeout=10)
