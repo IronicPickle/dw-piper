@@ -1,13 +1,12 @@
 from os import path
 from threading import Timer
+from subprocess import Popen
 
 import keyboard
 import zc.lockfile as lockfile
 from win10toast import ToastNotifier
 
-from src import tk_overlay, main_menu, variables
-from src.tk_overlay import TkOverlay
-from src.main_menu import MainMenu
+from src import variables, update_checker
 from src.variables import Env
 from src.update_checker import compare_versions
 
@@ -40,10 +39,10 @@ def main():
 def key_on_release(key):
   if key.name == "d" and keyboard.is_pressed("alt") and keyboard.is_pressed("ctrl"):
     print("Detected 'CTRL + ALT + D' key release")
-    MainMenu(TkOverlay())
+    Popen(path.join(Env.index_dir, "Duct Background.exe"))
   elif key.name == "print screen":
     print("Detected 'Print Screen' key release")
-    MainMenu(TkOverlay())
+    Popen(path.join(Env.index_dir, "Duct Background.exe"))
 
 def update_check_scheduler(latest_version_known):
   print("Performing update check...")
