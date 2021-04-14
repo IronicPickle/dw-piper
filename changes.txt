@@ -72,3 +72,6 @@
 
 1.7.2:
 - Fixed update server domain issue that causes update checks to fail
+
+1.8.0:
+- Moved the backgrond process to a seperate executable (Adjusted the install process to accomodate)

@@ -12,7 +12,6 @@ from win10toast import ToastNotifier
 
 from src.tk_overlay import TkOverlay
 from src.main_menu import MainMenu
-from src.background import Background
 from src.variables import Env
 from src.upload import Upload
 from src.form import Form
@@ -36,18 +35,15 @@ def main():
   try:
     lock = lockfile.LockFile(path.join(Env.appdata_path, "duct"))
   except lockfile.LockError:
-    already_open_error("Duct")
+    ToastNotifier().show_toast("Duct is already running",
+      "You can only have one instance of Duct running at any time",
+      icon_path=path.join(Env.index_dir, "images/icon.ico"),
+      duration=3
+    )
     return print("Duct is already running")
 
   MainMenu(TkOverlay())
   lock.close()
-
-def already_open_error(name):
-  ToastNotifier().show_toast(f"{name} is already running",
-    f"You can only have one instance of {name} running at any time",
-    icon_path=path.join(Env.index_dir, "images/icon.ico"),
-    duration=3
-  )
 
 def handle_args(args):
   
@@ -63,17 +59,6 @@ def handle_args(args):
       print("'parse-url' option must have a parsable url")
     parse_url(param)
     return True
-
-  if "--launch-background" in args:
-
-    try:
-      lock = lockfile.LockFile(path.join(Env.appdata_path, "duct-background"))
-    except lockfile.LockError:
-      already_open_error("Duct Background")
-      print("Duct Background is already running")
-      return True
-    Background()
-    lock.close()
 
   return False
 
@@ -155,6 +140,5 @@ protocols = {
   "upload/": upload,
   "form/": form
 }
-
 
 if __name__ == "__main__": main()

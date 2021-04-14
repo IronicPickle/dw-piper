@@ -7,7 +7,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{#AppId}                                                            
+AppId={{#AppId}
 AppName={#AppName}
 AppVersion={#AppVersion}
 ;AppVerName={#AppName} {#AppVersion}
@@ -38,7 +38,7 @@ Type: filesandordirs; Name: "{userappdata}\Duct"
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#ExeName}.exe"; WorkingDir: "{app}"
-Name: "{group}\{#AppName} Background"; Filename: "{app}\{#ExeName}.exe"; WorkingDir: {app}; Parameters: "--launch-background"
+Name: "{group}\{#AppName} Background"; Filename: "{app}\{#ExeName} Background.exe"; WorkingDir: "{app}";
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 
 [Registry]
@@ -97,7 +97,7 @@ begin
   Result := True;
   if RegValueExists(HKEY_LOCAL_MACHINE,'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppId}_is1', 'DisplayVersion') then
   begin
-    if VersionStrToInt(GetRegistryValue('DisplayVersion')) < 150 then
+    if VersionStrToInt(GetRegistryValue('DisplayVersion')) < 180 then
     begin
       MsgBox(ExpandConstant('In order to install this update, we must remove the previous installation. Press OK to continue.'), mbInformation, MB_OK);
       UninstallerPath := RemoveQuotes(GetRegistryValue('UninstallString'));
@@ -113,22 +113,25 @@ end;
 function InitializeSetup(): Boolean;
 begin
   TaskKill('{#ExeName}.exe');
+  TaskKill('{#ExeName} Background.exe');
   TaskKill('DW-Piper.exe');
   Result := CheckOldInstall();
 end;
 
 [Run]
 Filename: "schtasks"; \
-    Parameters: "/CREATE /F /SC ONLOGON /TN ""Duct"" /TR ""'{app}\{#ExeName}.exe' --launch-background"""; \
+    Parameters: "/CREATE /F /SC ONLOGON /TN ""Duct Background"" /TR ""'{app}\{#ExeName} Background.exe'"""; \
     Flags: runhidden
-Filename: "{app}\{#ExeName}"; \
-    Parameters: "--launch-background"; \
+Filename: "schtasks"; \
+    Parameters: "/DELETE /F /TN ""Duct"""; \
+    Flags: runhidden
+Filename: "{app}\{#ExeName} Background.exe"; \
     Flags: runhidden nowait runasoriginaluser
 
 [UninstallRun]
 Filename: "schtasks"; \
-    Parameters: "/DELETE /F /TN ""Duct"""; \
+    Parameters: "/DELETE /F /TN ""Duct Background"""; \
     Flags: runhidden
 Filename: "taskkill"; \
-    Parameters: "/F /IM ""{#ExeName}.exe"""; \
+    Parameters: "/F /IM ""{#ExeName} Background.exe"""; \
     Flags: runhidden
