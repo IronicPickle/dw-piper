@@ -75,3 +75,6 @@
 
 1.8.0:
 - Moved the backgrond process to a seperate executable (Adjusted the install process to accomodate)
+
+1.9.0:
+- Added auto alignment

@@ -3,10 +3,10 @@ from tkinter import Frame, Label, Button, LEFT, TOP
 
 from PIL import Image, ImageTk
 
-from src import upload, capture, align_menu
 from src.upload import Upload
 from src.capture import Capture
-from src.align_menu import AlignMenu
+from src.snap_menu import SnapMenu
+from src.align import Align
 from src.map import Map
 from src.variables import Env
 
@@ -45,25 +45,33 @@ class MainMenu:
     )
     self.divider_frame.pack(side=TOP, pady=(0, 10))
 
-    self.button_frame = Label(
+    self.button_frame_top = Label(
       self.front_frame,
       bg="#212121"
     )
-    self.button_frame.pack(side=TOP)
+    self.button_frame_top.pack(side=TOP)
 
-    self.generate_button("Upload", self.start_upload)
-    self.generate_button("Capture", self.start_capture)
-    self.generate_button("Align", self.start_align)
-    self.generate_button("Map", self.start_map)
-    self.generate_button("Cancel", self.destroy_root)
+    self.generate_button("Upload", self.start_upload, self.button_frame_top)
+    self.generate_button("Capture", self.start_capture, self.button_frame_top)
+    self.generate_button("Align", self.start_align, self.button_frame_top)
+
+    self.button_frame_bottom = Label(
+      self.front_frame,
+      bg="#212121"
+    )
+    self.button_frame_bottom.pack(side=TOP)
+
+    self.generate_button("Snap", self.start_snap, self.button_frame_bottom)
+    self.generate_button("Map", self.start_map, self.button_frame_bottom)
+    self.generate_button("Cancel", self.destroy_root, self.button_frame_bottom)
 
     self.root.after(1, self.root.focus_force)
 
     self.root.mainloop()
 
-  def generate_button(self, name, command):
+  def generate_button(self, name, command, frame):
     Button(
-      self.button_frame,
+      frame,
       text=name,
       font=("Courier", 12),
       command=command,
@@ -89,10 +97,14 @@ class MainMenu:
   def start_capture(self):
     self.destroy_back_frame()
     Capture(self.tk_overlay)
-
+    
   def start_align(self):
     self.destroy_back_frame()
-    AlignMenu(self.tk_overlay)
+    Align(self.tk_overlay)
+
+  def start_snap(self):
+    self.destroy_back_frame()
+    SnapMenu(self.tk_overlay)
 
   def start_map(self):
     self.destroy_back_frame()

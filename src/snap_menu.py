@@ -5,13 +5,13 @@ from tkinter import Frame, Label, Button, OptionMenu, TOP, LEFT, StringVar, FLAT
 from win10toast import ToastNotifier
 
 from src import align, variables, state_manager
-from src.align import Align
+from src.snap import Snap
 from src.variables import Env, WATER_COMPANIES
 
-class AlignMenu:
+class SnapMenu:
 
   def __init__(self, tk_overlay):
-    print("Align Menu > Started")
+    print("Snap Menu > Started")
 
     self.water_company = StringVar()
     state = state_manager.get()
@@ -139,15 +139,15 @@ class AlignMenu:
     state = state_manager.get()
     state_manager.update(state, { "water_company": self.water_company.get() })
     self.back_frame.destroy()
-    print("Align Menu > Destroyed")
+    print("Snap Menu > Destroyed")
 
   def start_clean(self):
     self.destroy_back_frame()
-    Align(self.tk_overlay, "clean", self.water_company.get())
+    Snap(self.tk_overlay, "clean", self.water_company.get())
 
   def start_drainage(self):
     self.destroy_back_frame()
-    Align(self.tk_overlay, "drainage", self.water_company.get())
+    Snap(self.tk_overlay, "drainage", self.water_company.get())
 
   def key_press(self, event):
     key_events = {

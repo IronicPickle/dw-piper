@@ -2,7 +2,7 @@ from tkinter import Frame, TOP, RIGHT, BOTTOM, LEFT, X, Y
 
 class TkResizer:
 
-  def __init__(self, frame, on_resize, on_rotate):
+  def __init__(self, frame):
     self.resizer_top_frame = Frame(frame, bg="#212121", height=10, cursor="exchange")
     self.resizer_top_frame.pack(side=TOP, fill=X)
     self.resizer_right_frame = Frame(frame, bg="#212121", width=10, cursor="exchange")
@@ -20,6 +20,8 @@ class TkResizer:
     self.resizer_se_frame.pack(side=BOTTOM)
     self.resizer_sw_frame = Frame(self.resizer_bottom_frame, bg="white", height=10, width=10, cursor="size_ne_sw")
     self.resizer_sw_frame.pack(side=LEFT)
+
+  def bind_events(self, on_resize, on_rotate):
 
     self.resizer_nw_frame.bind("<B1-Motion>", lambda event: on_resize(event, "nw"))
     self.resizer_ne_frame.bind("<B1-Motion>", lambda event: on_resize(event, "ne"))

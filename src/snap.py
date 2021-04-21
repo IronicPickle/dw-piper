@@ -1,31 +1,43 @@
 from os import path
-from tkinter import Label, Frame, TOP, RIGHT, N
+from tkinter import Label, Frame, TOP, BOTTOM, RIGHT, LEFT, N, E, S, W, X, Y, BOTH, Tk, filedialog
 import math
+from pathlib import Path
+import pyautogui
 import numpy as np
 from time import sleep
 
 from PIL import Image, ImageTk
-from pyautogui import position, click, doubleClick
+from pyautogui import position
+import cv2
+from win10toast import ToastNotifier
 
-from src import state_manager
-from src.variables import Env
+from src import variables, pdf_processor, state_manager
+from src.variables import Env, WATER_COMPANIES
+from src.pdf_processor import PdfProcessor
 from src.tk_resizer import TkResizer
+from src.auto_align import auto_align
 
-class Map:
+class Snap:
 
-  def __init__(self, tk_overlay):
+  def __init__(self, tk_overlay, pipe_type, water_company):
 
-    print("Map > Started")
+    print("Align > Started")
+
+    self.initial_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
 
     state = state_manager.get()
     self.initial_x = 0
     self.initial_y = 0
     self.previous_rotation = int(state["rotation"])
 
+    self.water_company = water_company
     self.capture_x = int(state["x"])
     self.capture_y = int(state["y"])
     self.capture_size = int(state["size"])
     self.capture_rotation = int(state["rotation"])
+
+    self.pipe_type = pipe_type
+    self.img_path = path.join(Env.appdata_path, f"images/{pipe_type}.png")
 
     tk_overlay.generate_frames()
 
@@ -37,16 +49,13 @@ class Map:
     self.root.attributes("-fullscreen", True)
     self.root.attributes("-alpha", 0.5)
 
-    self.root.bind("<Key>", self.key_press)
-
     self.image_frame = Frame(
       self.back_frame,
       bg="#212121"
     )
 
-    self.tk_resizer = TkResizer(self.image_frame).bind_events(self.corner_resize, self.on_rotate)
+    self.tk_resizer = TkResizer(self.image_frame)
 
-    self.initial_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
     initial_photoimage = ImageTk.PhotoImage(self.initial_img)
 
     self.image_label = Label(
@@ -59,16 +68,9 @@ class Map:
     self.image_label.image = initial_photoimage
     self.image_label.pack()
 
-    self.root.bind("<Button-1>", self.mouse_1_down)
-    self.root.bind("<ButtonRelease-1>", self.mouse_1_up)
-
-    self.image_label.bind("<B1-Motion>", self.mouse_1_move)
-    self.image_label.bind("<ButtonRelease-3>", self.mouse_3_up)
-    self.image_frame.bind("<Configure>", self.update_top_info_label)
-
     self.top_label = Label(
       self.back_frame,
-      text="Click and drag to align, resize and resize",
+      text="Click and drag to align, resize and rotate",
       font=("Courier", 16),
       bg="black",
       fg="white",
@@ -95,6 +97,15 @@ class Map:
     )
     self.right_label.pack(side=RIGHT, padx=(0, 50), anchor=N)
 
+    self.root.bind("<Key>", self.key_press)
+    self.root.bind("<Button-1>", self.mouse_1_down)
+    self.root.bind("<ButtonRelease-1>", self.mouse_1_up)
+
+    self.image_label.bind("<B1-Motion>", self.mouse_1_move)
+    self.image_frame.bind("<Configure>", self.update_top_info_label)
+
+    self.tk_resizer.bind_events(self.corner_resize, self.on_rotate)
+
     self.back_frame.after(1, self.back_frame_after)
 
   def destroy_root(self):
@@ -105,7 +116,7 @@ class Map:
 
   def destroy_back_frame(self):
     self.back_frame.destroy()
-    print("Map > Destroyed")
+    print("Align > Destroyed")
 
   def corner_resize(self, event, corner):
     mouse_x = position()[0]
@@ -176,28 +187,12 @@ class Map:
     self.previous_rotation = self.capture_rotation
     self.save_state()
 
-  def mouse_3_up(self, event):
-    mouse_x = position()[0]
-    mouse_y = position()[1]
-    self.root.withdraw()
-    sleep(0.1)
-    click(x=mouse_x, y=mouse_y)
-    self.root.deiconify()
-
-  def finish(self):
-    mouse_x = position()[0]
-    mouse_y = position()[1]
-    self.root.destroy()
-    sleep(0.1)
-    doubleClick(x=mouse_x, y=mouse_y)
-
   def save_state(self):
     state = state_manager.get()
     state_manager.update(state, {
       "x": self.capture_x,
       "y": self.capture_y,
-      "size": self.capture_size,
-      "rotation": self.capture_rotation
+      "size": self.capture_size
     })
 
   def key_right(self):
@@ -240,7 +235,38 @@ class Map:
   def key_minus(self):
     self.resize_initial_img(self.capture_size - 2, False)
 
-  def resize_initial_img(self, size, no_offset):
+  def finish(self):
+
+    self.destroy_back_frame()
+    self.destroy_root()
+
+    self.take_screenshot()
+    self.convert_to_alpha()
+    self.apply_masks()
+
+    pdf_process = PdfProcessor(path.join(Env.index_dir, f"./pdf_templates/{self.pipe_type}_template.pdf"))
+    pdf_process.insert_img(
+      path.join(Env.appdata_path, f"images/{self.pipe_type}_final.png"),
+      ( 60, 46, 472, 472 ), 0
+    )
+    pdf_process.insert_img(
+      path.join(Env.index_dir, "./images/copyright.png"),
+      ( 60, 510, 210, 9 ), 0
+    )
+    print("Processed PDF")
+
+    output_path = self.prompt_user_to_save()
+
+    if output_path:
+      pdf_process.pdf.save(output_path, deflate=True)
+      ToastNotifier().show_toast(f"Created {path.basename(output_path)} at",
+        output_path,
+        icon_path=path.join(Env.index_dir, "images/icon.ico"),
+        duration=3,
+        threaded=True
+      )
+
+  def resize_initial_img(self, size, no_offset=False):
     size = int(size)
     self.capture_size = size
     if size <= 0 or size > Env.res_x or size > Env.res_y:
@@ -250,7 +276,7 @@ class Map:
       self.initial_img
         .rotate(self.capture_rotation, Image.BILINEAR, expand=True)
         .resize((size, size), Image.BILINEAR)
-    )
+      )
     self.image_label.config(image=initial_photoimage)
     self.image_label.image = initial_photoimage
     offset = -1 if size > self.image_label.winfo_width() else 1
@@ -271,6 +297,89 @@ class Map:
     self.image_label.config(image=initial_photoimage)
     self.image_label.image = initial_photoimage
 
+  def take_screenshot(self):
+    Path(Path(self.img_path).parent).mkdir(parents=True, exist_ok=True)
+
+    print(f"{self.capture_size}, {self.capture_size}")
+
+    pyautogui.screenshot(self.img_path, (
+      self.capture_x + 1, self.capture_y + 1,
+      self.capture_size, self.capture_size
+    ))
+
+    print(f"{self.pipe_type} screenshot taken at: {self.capture_x}, {self.capture_y}\n  Size: {self.capture_size} x {self.capture_size}")
+
+  def convert_to_alpha(self):
+    if not path.exists(self.img_path):
+      raise f"No {self.pipe_type} image found"
+    img = cv2.imread(self.img_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+    cv2.imwrite(self.img_path, img)
+
+  def apply_masks(self):
+    final_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
+    img = cv2.imread(self.img_path, flags=cv2.IMREAD_UNCHANGED)
+    mask_dir_path = path.join(Env.appdata_path, f"images/masks/{self.pipe_type}")
+
+    Path(mask_dir_path).mkdir(parents=True, exist_ok=True)
+    bgra_bounds = WATER_COMPANIES[self.water_company][self.pipe_type]
+    for i in bgra_bounds:
+      mask_path = path.join(mask_dir_path, f"{i}.png")
+      bgra_bound = bgra_bounds[i]
+      masked_img = self.apply_mask(img, bgra_bound)
+      print(f"Generated {i} mask")
+      masked_img = cv2.resize(
+        masked_img,
+        (final_img.width, final_img.height),
+        interpolation=cv2.INTER_CUBIC
+      )
+      cv2.imwrite(mask_path, masked_img)
+      masked_img = Image.open(mask_path)
+      final_img.paste(masked_img, (0, 0), masked_img)
+
+    final_img.save(path.join(Env.appdata_path, f"images/{self.pipe_type}_final.png"), "PNG")
+
+  def apply_mask(self, img, bgra_bound):
+    mask = cv2.inRange(
+      img,
+      np.asarray(bgra_bound if type(bgra_bound) == list else bgra_bound[0]),
+      np.asarray(bgra_bound if type(bgra_bound) == list else bgra_bound[1])
+    )
+    return cv2.bitwise_and(
+      img,
+      img,
+      mask=mask
+    )
+
+  def prompt_user_to_save(self):
+
+    root = Tk()
+    root.withdraw()
+
+    output_path = None
+
+    def open_prompt():
+      nonlocal output_path
+      state = state_manager.get()
+
+      output_path = filedialog.asksaveasfilename(
+        parent=root,
+        initialdir=state["save_dir"] if "save_dir" in state else "/",
+        title=f"Save {self.pipe_type} PDF file",
+        filetypes=[("PDF File", "*.pdf")],
+        defaultextension=".pdf",
+        initialfile=state["reference"] + (" CC" if self.pipe_type == "clean" else " DD")
+      )
+      root.destroy()
+
+      if output_path:
+        state_manager.update(state, { "save_dir": path.dirname(output_path) })
+
+    root.after(1, open_prompt)
+    root.mainloop()
+
+    return output_path
+
   def key_press(self, event):
     key_events = {
       27: self.destroy_root,
@@ -284,7 +393,8 @@ class Map:
     }
     try:
       key_events[event.keycode]()
-    except:
+    except Exception as err:
+      print(err)
       pass
 
   def back_frame_after(self):
