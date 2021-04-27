@@ -10,12 +10,11 @@ import requests
 import zc.lockfile as lockfile
 from win10toast import ToastNotifier
 
-from src.lib.tk_overlay import TkOverlay
 from src.lib.variables import Env
 
 from src.menus.main_menu import MainMenu
 
-from src.upload import Upload
+from src.extract import Extract
 from src.form import Form
 
 def duct_except_hook(exctype, value, traceback):
@@ -44,7 +43,7 @@ def main():
     )
     return print("Duct is already running")
 
-  MainMenu(TkOverlay())
+  MainMenu()
   lock.close()
 
 def handle_args(args):
@@ -91,7 +90,7 @@ def parse_url(url):
 
   protocols[address](options)
 
-def upload(options):
+def extract(options):
 
   url = None
   ref = None
@@ -101,7 +100,7 @@ def upload(options):
   map_path = None
   if url: map_path = get_mapping(url)
 
-  Upload(map_path, ref)
+  Extract(map_path, ref)
 
 def get_mapping(url):
   map_path = path.join(Env.appdata_path, "mapping.pdf")
@@ -139,7 +138,7 @@ def form(options):
   Form(form_type, data)
 
 protocols = {
-  "upload/": upload,
+  "upload/": extract,
   "form/": form
 }
 

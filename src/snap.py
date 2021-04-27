@@ -14,15 +14,17 @@ from src.auto_align import auto_align
 
 from src.lib import state_manager
 from src.lib.variables import Env, WATER_COMPANIES
+from src.lib.tk_overlay import TkOverlay
 from src.lib.pdf_processor import PdfProcessor
 from src.lib.tk_resizer import TkResizer
 from src.lib.utils import Utils
+from src.lib.file_prompt import FilePromptSave
 
-class Snap:
+class Snap(TkOverlay):
 
-  def __init__(self, tk_overlay, pipe_type, water_company):
+  def __init__(self, root, pipe_type, water_company):
 
-    print("Align > Started")
+    super().__init__(root)
 
     self.initial_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
 
@@ -40,12 +42,7 @@ class Snap:
     self.pipe_type = pipe_type
     self.img_path = path.join(Env.appdata_path, f"images/{pipe_type}.png")
 
-    tk_overlay.generate_frames()
-
-    self.tk_overlay = tk_overlay
-    self.root = tk_overlay.root
-    self.back_frame = tk_overlay.back_frame
-    self.front_frame = tk_overlay.front_frame
+    self.generate_frames()
 
     self.root.attributes("-fullscreen", True)
     self.root.attributes("-alpha", 0.5)
@@ -55,7 +52,7 @@ class Snap:
       bg="#212121"
     )
 
-    self.tk_resizer = TkResizer(self.image_frame)
+    self.Resizer = TkResizer(self.image_frame)
 
     initial_photoimage = ImageTk.PhotoImage(self.initial_img)
 
@@ -105,19 +102,12 @@ class Snap:
     self.image_label.bind("<B1-Motion>", self.mouse_1_move)
     self.image_frame.bind("<Configure>", self.update_top_info_label)
 
-    self.tk_resizer.bind_events(self.corner_resize, self.on_rotate)
+    self.Resizer.bind_events(self.corner_resize, self.on_rotate)
 
     self.back_frame.after(1, self.back_frame_after)
 
-  def destroy_root(self):
+  def on_destroy(self):
     self.save_state()
-    self.destroy_back_frame()
-    self.root.destroy()
-    print("Root > Destroyed")
-
-  def destroy_back_frame(self):
-    self.back_frame.destroy()
-    print("Align > Destroyed")
 
   def corner_resize(self, event, corner):
     mouse_x = position()[0]
@@ -238,8 +228,7 @@ class Snap:
 
   def finish(self):
 
-    self.destroy_back_frame()
-    self.destroy_root()
+    self.root.destroy()
 
     self.take_screenshot()
     self.convert_to_alpha()
@@ -255,13 +244,18 @@ class Snap:
       ( 60, 510, 210, 9 ), 0
     )
     print("Processed PDF")
+    
+    state = state_manager.get()
 
-    output_path = self.prompt_user_to_save()
+    output_path = map_path = FilePromptSave(
+      f"Save {self.pipe_type} PDF file", state["save_dir"] if "save_dir" in state else "/",
+      [("PDF File", "*.pdf")], ".pdf", state["reference"] + (" CC" if self.pipe_type == "clean" else " DD")
+    ).path
 
     if output_path:
       PdfProcess.pdf.save(output_path, deflate=True)
       Utils.send_toast(
-        f"Created {path.basename(output_path)} at".upper,
+        f"Created {path.basename(output_path)} at",
         output_path
       )
 
@@ -350,38 +344,9 @@ class Snap:
       mask=mask
     )
 
-  def prompt_user_to_save(self):
-
-    root = Tk()
-    root.withdraw()
-
-    output_path = None
-
-    def open_prompt():
-      nonlocal output_path
-      state = state_manager.get()
-
-      output_path = filedialog.asksaveasfilename(
-        parent=root,
-        initialdir=state["save_dir"] if "save_dir" in state else "/",
-        title=f"Save {self.pipe_type} PDF file",
-        filetypes=[("PDF File", "*.pdf")],
-        defaultextension=".pdf",
-        initialfile=state["reference"] + (" CC" if self.pipe_type == "clean" else " DD")
-      )
-      root.destroy()
-
-      if output_path:
-        state_manager.update(state, { "save_dir": path.dirname(output_path) })
-
-    root.after(1, open_prompt)
-    root.mainloop()
-
-    return output_path
-
   def key_press(self, event):
     key_events = {
-      27: self.destroy_root,
+      27: self.root.destroy,
       37: self.key_left,
       38: self.key_up,
       39: self.key_right,

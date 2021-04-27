@@ -1,11 +1,17 @@
+from os import path
 from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar, FLAT
 
+from PIL import Image, ImageTk
+
 from src.lib import state_manager
+from src.lib.tk_overlay import TkOverlay
+from src.lib.variables import Env
 
-class OptionsMenu:
+class OptionsMenu(TkOverlay):
 
-  def __init__(self, tk_overlay):
-    print("Options Menu > Started")
+  def __init__(self, root = None, initial_img_pil = None):
+
+    super().__init__(root)
 
     self.cancelled = False
 
@@ -13,36 +19,40 @@ class OptionsMenu:
     state = state_manager.get()
     state_manager.update(state, { "reference": "" })
 
-    tk_overlay.generate_frames()
-    tk_overlay.generate_title()
+    self.generate_frames()
+    self.generate_header()
+    self.generate_title("Current Image")
 
-    self.tk_overlay = tk_overlay
-    self.root = tk_overlay.root
-    self.back_frame = tk_overlay.back_frame
-    self.front_frame = tk_overlay.front_frame
-
-    self.root.attributes("-fullscreen", False)
-    self.root.attributes("-alpha", 1)
+    self.resize(450, 625)
 
     self.root.bind("<Key>", self.key_press)
 
-    self.button_label = Label(
-      self.front_frame,
-      text="Input your Reference",
-      font=("Courier", 16),
-      pady=10,
-      bg="#212121",
-      fg="white"
-    )
-    self.button_label.pack(side=TOP)
+    self.initial_img_pil = initial_img_pil
+    if self.initial_img_pil is None:
+      self.initial_img_pil = Image.open(
+        path.join(Env.appdata_path, "images/initial.png")
+      )
 
-    self.divider_frame = Frame(
-      self.front_frame,
-      bg="white",
-      width=120,
-      height=1
+    self.initial_img_tk = ImageTk.PhotoImage(
+      self.initial_img_pil.resize((300, 300), Image.BILINEAR)
     )
-    self.divider_frame.pack(side=TOP, pady=(0, 10))
+
+    self.image_frame = Frame(
+      self.front_frame, highlightthickness=1, highlightcolor="#fff"
+    )
+    self.image_frame.pack(side=TOP, pady=(10))
+
+    self.image_label = Label(
+      self.image_frame,
+      image=self.initial_img_tk,
+      bg="#212121",
+      borderwidth=0
+    )
+    self.image_label.image = self.initial_img_tk
+    self.image_label.pack()
+
+    self.generate_title("Input a Reference")
+
 
     self.reference_entry = Entry(
       self.front_frame,
@@ -63,37 +73,16 @@ class OptionsMenu:
     )
     self.button_frame.pack(side=TOP)
 
-    self.generate_button("Submit", self.submit)
-    self.generate_button("Cancel", self.cancel)
+    self.generate_button("Submit", self.submit, self.button_frame)
+    self.generate_button("Cancel", self.cancel, self.button_frame)
 
     self.root.after(1, self.reference_entry.focus)
 
     self.root.mainloop()
 
-  def generate_button(self, name, command):
-    Button(
-      self.button_frame,
-      text=name,
-      font=("Courier", 12),
-      command=command,
-      cursor="hand2",
-      bd=0,
-      bg="#212121",
-      fg="white"
-    ).pack(side=LEFT, padx=10)
-
   def cancel(self):
     self.cancelled = True
-    self.destroy_root()
-
-  def destroy_root(self):
-    self.destroy_back_frame()
     self.root.destroy()
-    print("Root > Destroyed")
-
-  def destroy_back_frame(self):
-    self.back_frame.destroy()
-    print("Options Menu > Destroyed")
 
   def submit(self):
     save_ref(self.reference.get())

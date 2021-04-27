@@ -1,30 +1,26 @@
-from os import path, replace, remove
+from os import path
 from pathlib import Path
 from tkinter import Frame, Label, TOP
 
 import pyautogui
-from win10toast import ToastNotifier
 
 from src.menus.options_menu import OptionsMenu
 
+from src.lib.utils import Utils
 from src.lib import state_manager
+from src.lib.tk_overlay import TkOverlay
 from src.lib.variables import Env
 
-class Capture:
+class Capture(TkOverlay):
   mouse_start = {"x": 0, "y": 0}
 
-  def __init__(self, tk_overlay):
+  def __init__(self, root = None):
 
-    print("Capture > Started")
+    super().__init__(root)
 
     self.img_path = path.join(Env.appdata_path, f"images/initial.png")
 
-    tk_overlay.generate_frames()
-
-    self.tk_overlay = tk_overlay
-    self.root = tk_overlay.root
-    self.back_frame = tk_overlay.back_frame
-    self.front_frame = tk_overlay.front_frame
+    self.generate_frames()
 
     self.root.attributes("-fullscreen", True)
     self.root.attributes("-alpha", 0.5)
@@ -66,15 +62,6 @@ class Capture:
     self.coords_label.place(anchor="center")
 
     self.back_frame.after(1, self.back_frame.focus_force)
-
-  def destroy_root(self):
-    self.destroy_back_frame()
-    self.root.destroy()
-    print("Root > Destroyed")
-
-  def destroy_back_frame(self):
-    self.back_frame.destroy()
-    print("Capture > Destroyed")
 
   def mouse_1_down(self, event):
     self.selection_frame.pack()
@@ -132,25 +119,28 @@ class Capture:
     box_size = self.selection_frame.winfo_width()
     self.root.withdraw()
 
-    Path(path.join(Env.appdata_path, "images")).mkdir(parents=True, exist_ok=True)
-    temp_initial_path = path.join(Env.appdata_path, "images/initial_temp.png")
-    pyautogui.screenshot(temp_initial_path, (
+    self.initial_img_pil = pyautogui.screenshot(region=(
       capture_x, capture_y,
       box_size, box_size
     ))
 
-    self.destroy_back_frame()
+    Utils.send_toast(
+      f"Screenshot taken at: {capture_x}, {capture_y}",
+      f"Size: {box_size} x {box_size}"
+    )
+    print(f"Initial screenshot taken at: {capture_x}, {capture_y}\n  Size: {box_size} x {box_size}")
+
+    self.back_frame.destroy()
     self.root.deiconify()
 
-    options_menu = OptionsMenu(self.tk_overlay)
+    options_menu = OptionsMenu(self.root, self.initial_img_pil)
     if options_menu.cancelled:
-      if(path.exists(temp_initial_path)):
-        remove(temp_initial_path)
       return None
 
     initial_path = path.join(Env.appdata_path, "images/initial.png")
-    if(path.exists(temp_initial_path)):
-      replace(temp_initial_path, initial_path)
+    if(path.exists(initial_path)):
+      Path(path.join(Env.appdata_path, "images")).mkdir(parents=True, exist_ok=True)
+      self.initial_img_pil.save(initial_path)
 
     state = state_manager.get()
     state_manager.update(state, {
@@ -159,18 +149,13 @@ class Capture:
       "size": box_size, "rotation": 0
     })
 
-    print(f"Initial screenshot taken at: {capture_x}, {capture_y}\n  Size: {box_size} x {box_size}")
-
-    ToastNotifier().show_toast(f"Screenshot taken at: {capture_x}, {capture_y}",
-      f"Size: {box_size} x {box_size}",
-      icon_path=path.join(Env.index_dir, "images/icon.ico"),
-      duration=3,
-      threaded=True
+    Utils.send_toast(
+      "Capture complete", "You can now align the image"
     )
 
   def key_press(self, event):
     key_events = {
-      27: self.destroy_root
+      27: self.root.destroy
     }
     try:
       key_events[event.keycode]()

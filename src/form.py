@@ -10,7 +10,7 @@ from src.menus.confirm_menu import ConfirmMenu
 
 from src.lib.variables import Env
 from src.lib.pdf_processor import PdfProcessor
-from src.lib.tk_overlay import TkOverlay
+from src.lib.file_prompt import FilePromptSave
 
 class Form:
 
@@ -25,12 +25,12 @@ class Form:
     self.form_type = form_type
     self.data = data
 
-    confirm_menu = ConfirmMenu(TkOverlay(), f"Generate {form_type.upper()} Form")
-    if confirm_menu.cancelled: return None
+    if ConfirmMenu(title = f"Generate {form_type.upper()} Form").cancelled:
+      return None
 
     if form_type == "con29r":
       street = data["property"]["street"]
-      form_menu = Con29RMenu(TkOverlay(), street)
+      form_menu = Con29RMenu(default_road = street)
       if form_menu.cancelled: return None
       roads = (
         form_menu.road1.get(),
@@ -122,32 +122,13 @@ class Form:
     return name
 
   def save_pdf(self):
-    save_dir = self.prompt_user_to_save()
+    save_dir = FilePromptSave(
+      f"Save {self.form_type.upper()} PDF file", None, [("PDF File", "*.pdf")],
+      ".pdf", f"{self.data['reference']} {self.form_type.upper()}"
+    ).path
     if len(save_dir) == 0: return None
     self.PdfProcess.pdf.save(save_dir, deflate=True)
     self.form_generated_notification(self.form_type.upper(), save_dir)
-
-  def prompt_user_to_save(self):
-
-    root = Tk()
-    root.withdraw()
-
-    output_path = None
-
-    def open_prompt():
-      nonlocal output_path
-
-      output_path = filedialog.asksaveasfilename(
-        parent=root,
-        title=f"Save {self.form_type.upper()} PDF file",
-        filetypes=[("PDF File", "*.pdf")],
-        defaultextension=".pdf",
-        initialfile=f"{self.data['reference']} {self.form_type.upper()}"
-      )
-
-    open_prompt()
-
-    return output_path
 
   address_keys = (
     "flatNumber", "houseName", "houseNumber", "street", "addressLine2", "locality", "town", "county", "postCode"

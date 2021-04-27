@@ -12,14 +12,17 @@ import cv2
 
 from src.auto_align import auto_align
 
+from src.lib import state_manager
 from src.lib.variables import Env
 from src.lib.pdf_processor import PdfProcessor
+from src.lib.tk_overlay import TkOverlay
+from src.lib.utils import Utils
 
-class Align:
+class Align(TkOverlay):
 
-  def __init__(self, tk_overlay):
+  def __init__(self, root = None):
 
-    print("Align > Started")
+    super().__init__(root)
 
     self.initial_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
 
@@ -33,12 +36,7 @@ class Align:
     self.capture_size = int(state["size"])
     self.capture_rotation = int(state["rotation"])
 
-    tk_overlay.generate_frames()
-
-    self.tk_overlay = tk_overlay
-    self.root = tk_overlay.root
-    self.back_frame = tk_overlay.back_frame
-    self.front_frame = tk_overlay.front_frame
+    self.generate_frames()
 
     self.root.attributes("-fullscreen", True)
     self.root.attributes("-alpha", 0.5)
@@ -73,15 +71,8 @@ class Align:
 
     self.back_frame.after(1, self.back_frame_after)
 
-  def destroy_root(self):
+  def on_destroy():
     self.save_state()
-    self.destroy_back_frame()
-    self.root.destroy()
-    print("Root > Destroyed")
-
-  def destroy_back_frame(self):
-    self.back_frame.destroy()
-    print("Align > Destroyed")
 
   def save_state(self):
     state = state_manager.get()
@@ -109,14 +100,11 @@ class Align:
 
   def finish(self):
 
-    self.destroy_back_frame()
-    self.destroy_root()
+    self.root.destroy()
 
-    ToastNotifier().show_toast(f"Alignment Attempt Completed",
-      "Image position and size saved",
-      icon_path=path.join(Env.index_dir, "images/icon.ico"),
-      duration=3,
-      threaded=True
+    Utils.send_toast(
+      "Alignment Attempt Completed",
+      "Image position and size saved"
     )
 
   def resize_initial_img(self, size, no_offset=False):
@@ -152,7 +140,7 @@ class Align:
 
   def key_press(self, event):
     key_events = {
-      27: self.destroy_root,
+      27: self.root.destroy,
       13: self.finish
     }
     try:

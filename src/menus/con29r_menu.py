@@ -1,9 +1,12 @@
 from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar, FLAT
 
-class Con29RMenu:
+from src.lib.tk_overlay import TkOverlay
 
-  def __init__(self, tk_overlay, default_road=""):
-    print("Options Menu > Started")
+class Con29RMenu(TkOverlay):
+
+  def __init__(self, root = None, default_road=""):
+
+    super().__init__(root)
 
     self.cancelled = False
     self.default_road = StringVar()
@@ -13,37 +16,13 @@ class Con29RMenu:
 
     self.default_road.set(default_road)
 
-    tk_overlay.generate_frames()
-    tk_overlay.generate_title()
+    self.generate_frames()
+    self.generate_header()
+    self.generate_title("Roads to Search")
 
-    self.tk_overlay = tk_overlay
-    self.root = tk_overlay.root
-    self.back_frame = tk_overlay.back_frame
-    self.front_frame = tk_overlay.front_frame
-
-    self.root.attributes("-fullscreen", False)
-    self.root.attributes("-alpha", 1)
-    self.root.minsize(450, 400)
+    self.resize(450, 400)
 
     self.root.bind("<Key>", self.key_press)
-
-    self.entry_label = Label(
-      self.front_frame,
-      text="Roads to Search",
-      font=("Courier", 16),
-      pady=10,
-      bg="#212121",
-      fg="white"
-    )
-    self.entry_label.pack(side=TOP)
-
-    self.divider_frame = Frame(
-      self.front_frame,
-      bg="white",
-      width=120,
-      height=1
-    )
-    self.divider_frame.pack(side=TOP, pady=(0, 10))
 
     self.entry_0 = self.generate_entries(self.default_road, "readonly")
     self.entry_1 = self.generate_entries(self.road1)
@@ -56,24 +35,12 @@ class Con29RMenu:
     )
     self.button_frame.pack(side=TOP)
 
-    self.generate_button("Submit", self.submit)
-    self.generate_button("Cancel", self.cancel)
+    self.generate_button("Submit", self.submit, self.button_frame)
+    self.generate_button("Cancel", self.cancel, self.button_frame)
 
     self.root.after(1, self.entry_2.focus)
 
     self.root.mainloop()
-
-  def generate_button(self, name, command):
-    Button(
-      self.button_frame,
-      text=name,
-      font=("Courier", 12),
-      command=command,
-      cursor="hand2",
-      bd=0,
-      bg="#212121",
-      fg="white"
-    ).pack(side=LEFT, padx=10)
 
   def generate_entries(self, road_variable, state="normal"):
     entry = Entry(
@@ -94,23 +61,14 @@ class Con29RMenu:
 
   def cancel(self):
     self.cancelled = True
-    self.destroy_root()
-
-  def destroy_root(self):
-    self.destroy_back_frame()
     self.root.destroy()
-    print("Root > Destroyed")
-
-  def destroy_back_frame(self):
-    self.back_frame.destroy()
-    print("Options Menu > Destroyed")
 
   def submit(self):
     self.root.destroy()
 
   def key_press(self, event):
     key_events = {
-      27: self.destroy_root,
+      27: self.cancel,
       13: self.submit
     }
     try:

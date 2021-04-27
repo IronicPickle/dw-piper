@@ -12,14 +12,16 @@ from src.lib.file_prompt import FilePromptOpen
 from src.lib import state_manager
 from src.lib.variables import Env
 
-class Upload:
+class Extract:
 
   def __init__(self, map_path=None, ref=None):
     
     state = state_manager.get()
 
     if not map_path:
-      map_path = FilePromptOpen(state["map_path"]).path
+      map_path = FilePromptOpen(
+        "Choose a PDF", state["map_path"], [("PDF File", "*.pdf")]
+      ).path
 
     if not map_path:
       return None
@@ -52,17 +54,19 @@ class Upload:
       "size": size, "rotation": 0
     })
 
-
     if not ref:
-      option_menu = OptionsMenu(TkOverlay())
+      Utils.send_toast(
+        "Map extraction success",
+        "Input a reference to continue"
+      )
+      option_menu = OptionsMenu()
       if option_menu.cancelled: return None
       ref = option_menu.reference.get()
     else:
       save_ref(ref)
-
+  
     Utils.send_toast(
-      "Map extraction success",
-      f"You can now align the image\nReference: {ref}"
+      "Map extraction complete", "You can now align the image"
     )
 
     
