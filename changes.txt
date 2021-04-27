@@ -78,3 +78,8 @@
 
 1.9.0:
 - Added auto alignment
+
+1.10.0:
+- Major Refactoring
+- Re-organised the main menu
+- A new image preview on the reference input screen
