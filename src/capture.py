@@ -5,9 +5,10 @@ from tkinter import Frame, Label, TOP
 import pyautogui
 from win10toast import ToastNotifier
 
-from src import state_manager, variables
-from src.variables import Env
-from src.options_menu import OptionsMenu
+from src.menus.options_menu import OptionsMenu
+
+from src.lib import state_manager
+from src.lib.variables import Env
 
 class Capture:
   mouse_start = {"x": 0, "y": 0}

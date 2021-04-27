@@ -9,13 +9,14 @@ from time import sleep
 from PIL import Image, ImageTk
 from pyautogui import position
 import cv2
-from win10toast import ToastNotifier
 
-from src import variables, pdf_processor, state_manager
-from src.variables import Env, WATER_COMPANIES
-from src.pdf_processor import PdfProcessor
-from src.tk_resizer import TkResizer
 from src.auto_align import auto_align
+
+from src.lib import state_manager
+from src.lib.variables import Env, WATER_COMPANIES
+from src.lib.pdf_processor import PdfProcessor
+from src.lib.tk_resizer import TkResizer
+from src.lib.utils import Utils
 
 class Snap:
 
@@ -244,12 +245,12 @@ class Snap:
     self.convert_to_alpha()
     self.apply_masks()
 
-    pdf_process = PdfProcessor(path.join(Env.index_dir, f"./pdf_templates/{self.pipe_type}_template.pdf"))
-    pdf_process.insert_img(
+    PdfProcess = PdfProcessor(path.join(Env.index_dir, f"./pdf_templates/{self.pipe_type}_template.pdf"))
+    PdfProcess.insert_img(
       path.join(Env.appdata_path, f"images/{self.pipe_type}_final.png"),
       ( 60, 46, 472, 472 ), 0
     )
-    pdf_process.insert_img(
+    PdfProcess.insert_img(
       path.join(Env.index_dir, "./images/copyright.png"),
       ( 60, 510, 210, 9 ), 0
     )
@@ -258,12 +259,10 @@ class Snap:
     output_path = self.prompt_user_to_save()
 
     if output_path:
-      pdf_process.pdf.save(output_path, deflate=True)
-      ToastNotifier().show_toast(f"Created {path.basename(output_path)} at",
-        output_path,
-        icon_path=path.join(Env.index_dir, "images/icon.ico"),
-        duration=3,
-        threaded=True
+      PdfProcess.pdf.save(output_path, deflate=True)
+      Utils.send_toast(
+        f"Created {path.basename(output_path)} at".upper,
+        output_path
       )
 
   def resize_initial_img(self, size, no_offset=False):

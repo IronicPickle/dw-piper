@@ -1,37 +1,40 @@
 from os import path, remove
-from tkinter import Tk, filedialog
+from tkinter import Tk
 from pathlib import Path
 
-from win10toast import ToastNotifier
+from src.menus.options_menu import OptionsMenu, save_ref
 
-from src import variables, pdf_processor, state_manager, img_utils
-from src.variables import Env
-from src.pdf_processor import PdfProcessor
-from src.img_utils import crop_img
-from src.options_menu import OptionsMenu, save_ref
-from src.tk_overlay import TkOverlay
+from src.lib.pdf_processor import PdfProcessor
+from src.lib.img_utils import crop_img
+from src.lib.tk_overlay import TkOverlay
+from src.lib.utils import Utils
+from src.lib.file_prompt import FilePromptOpen
+from src.lib import state_manager
+from src.lib.variables import Env
 
 class Upload:
 
   def __init__(self, map_path=None, ref=None):
+    
+    state = state_manager.get()
 
     if not map_path:
-      map_path = self.prompt_user_to_open()
+      map_path = FilePromptOpen(state["map_path"]).path
 
     if not map_path:
       return None
 
-    pdf_process = PdfProcessor(map_path)
-    img_pix = pdf_process.extract_img(16)
+    state_manager.update(state, { "map_path": path.dirname(map_path) })
+
+    PdfProcess = PdfProcessor(map_path)
+    img_pix = PdfProcess.extract_img(16)
 
     img_path = path.join(Env.appdata_path, "images/initial.png")
 
     if not img_pix:
-      ToastNotifier().show_toast("Map extraction failed",
-        "Please make sure your pdf is formatted correctly",
-        icon_path=path.join(Env.index_dir, "images/icon.ico"),
-        duration=3,
-        threaded=True
+      Utils.send_toast(
+        "Map extraction failed",
+        "Please make sure your pdf is formatted correctly"
       )
       return None
 
@@ -57,37 +60,9 @@ class Upload:
     else:
       save_ref(ref)
 
-    ToastNotifier().show_toast("Map extraction success",
-      f"You can now align the image\nReference: {ref}",
-      icon_path=path.join(Env.index_dir, "images/icon.ico"),
-      duration=3,
-      threaded=True
+    Utils.send_toast(
+      "Map extraction success",
+      f"You can now align the image\nReference: {ref}"
     )
 
-  def prompt_user_to_open(self):
-
-    root = Tk()
-    root.withdraw()
-
-    map_path = None
-
-    def open_prompt():
-      nonlocal map_path
-      state = state_manager.get()
-
-      map_path = filedialog.askopenfilename(
-        parent=root,
-        initialdir=state["map_path"] if "map_path" in state else "/",
-        title="Upload a mapping PDF",
-        filetypes=[("PDF File", "*.pdf")],
-        defaultextension=".pdf"
-      )
-      root.destroy()
-
-      if map_path:
-        state_manager.update(state, { "map_path": path.dirname(map_path) })
-
-    root.after(1, open_prompt)
-    root.mainloop()
-
-    return map_path
+    

@@ -1,8 +1,7 @@
 from os import path
 import json
 
-from src import variables
-from src.variables import Env
+from src.lib.variables import Env
 
 state_path = path.join(Env.appdata_path, "state.json")
 

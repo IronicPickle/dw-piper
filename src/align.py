@@ -9,13 +9,11 @@ from time import sleep
 from PIL import Image, ImageTk
 from pyautogui import position
 import cv2
-from win10toast import ToastNotifier
 
-from src import variables, pdf_processor, state_manager
-from src.variables import Env
-from src.pdf_processor import PdfProcessor
-from src.tk_resizer import TkResizer
 from src.auto_align import auto_align
+
+from src.lib.variables import Env
+from src.lib.pdf_processor import PdfProcessor
 
 class Align:
 
@@ -114,7 +112,7 @@ class Align:
     self.destroy_back_frame()
     self.destroy_root()
 
-    ToastNotifier().show_toast(f"Alignment Completed",
+    ToastNotifier().show_toast(f"Alignment Attempt Completed",
       "Image position and size saved",
       icon_path=path.join(Env.index_dir, "images/icon.ico"),
       duration=3,

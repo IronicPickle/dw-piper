@@ -3,8 +3,7 @@ from tkinter import Frame, Label, Button, Scrollbar, Listbox, TOP, BOTTOM, LEFT,
 
 import win32api
 
-from src import variables
-from src.variables import Env
+from src.lib.variables import Env
 
 class UpdatePrompt:
 

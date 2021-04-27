@@ -4,9 +4,8 @@ from tkinter import Tk, Frame, TOP, LEFT, Label
 from PIL import Image, ImageTk
 import win32api
 
-from src import variables
-from src.variables import Env
-from src.tk_rightclick_menu import TkRightclickMenu
+from src.lib.tk_rightclick_menu import TkRightclickMenu
+from src.lib.variables import Env
 
 class TkOverlay:
 

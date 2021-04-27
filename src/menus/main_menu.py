@@ -5,10 +5,12 @@ from PIL import Image, ImageTk
 
 from src.upload import Upload
 from src.capture import Capture
-from src.snap_menu import SnapMenu
 from src.align import Align
 from src.map import Map
-from src.variables import Env
+
+from src.menus.snap_menu import SnapMenu
+
+from src.lib.variables import Env
 
 class MainMenu:
 

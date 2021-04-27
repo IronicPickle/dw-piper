@@ -7,9 +7,9 @@ from time import sleep
 from PIL import Image, ImageTk
 from pyautogui import position, click, doubleClick
 
-from src import state_manager
-from src.variables import Env
-from src.tk_resizer import TkResizer
+from src.lib import state_manager
+from src.lib.variables import Env
+from src.lib.tk_resizer import TkResizer
 
 class Map:
 

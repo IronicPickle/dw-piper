@@ -4,9 +4,10 @@ from tkinter import Frame, Label, Button, OptionMenu, TOP, LEFT, StringVar, FLAT
 
 from win10toast import ToastNotifier
 
-from src import align, variables, state_manager
 from src.snap import Snap
-from src.variables import Env, WATER_COMPANIES
+
+from src.lib import state_manager
+from src.lib.variables import Env, WATER_COMPANIES
 
 class SnapMenu:
 

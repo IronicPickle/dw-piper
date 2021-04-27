@@ -10,9 +10,11 @@ import requests
 import zc.lockfile as lockfile
 from win10toast import ToastNotifier
 
-from src.tk_overlay import TkOverlay
-from src.main_menu import MainMenu
-from src.variables import Env
+from src.lib.tk_overlay import TkOverlay
+from src.lib.variables import Env
+
+from src.menus.main_menu import MainMenu
+
 from src.upload import Upload
 from src.form import Form
 

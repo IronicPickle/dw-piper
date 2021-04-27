@@ -5,10 +5,10 @@ import json
 
 import requests
 
-from src import tk_overlay, update_prompt, variables
-from src.tk_overlay import TkOverlay
 from src.update_prompt import UpdatePrompt
-from src.variables import Env
+
+from src.lib.tk_overlay import TkOverlay
+from src.lib.variables import Env
 
 def check_latest_version():
 

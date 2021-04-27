@@ -1,7 +1,5 @@
 from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar, FLAT
 
-from src import state_manager
-
 class Con29RMenu:
 
   def __init__(self, tk_overlay, default_road=""):

@@ -27,23 +27,23 @@ WATER_COMPANIES = {
       "water_meter": [214, 0, 11, 255],
       "commercial_meter": [214, 14, 0, 255]
     }
-  }, #"Wessex Water": {
-    #"drainage": {
-      #"combined": ([255, 0, 255, 255], [255, 200, 255, 255]),
-      #"foul": ([0, 0, 255, 255], [100, 100, 255, 255]),
-      #"surface": ([255, 112, 0, 255], [255, 165, 95, 255])
-    #}, "clean": {}
-  #}, "Bristol Water": {
-    #"drainage": {},
-    #"clean": {
-      #"water_main_1-meter_in_use": [255, 0, 0, 255],
-      #"water_main_2": [255, 255, 0, 255],
-      #"supply_pipe-private_main": [0, 0, 255, 255],
-      #"abandoned": [157, 157, 157, 255],
-      #"common_pipe": [245, 0, 122, 255],
-      #"hydrant": [0, 178, 0, 255],
-      #"fire_hydrant": [211, 0, 255, 255],
-      #"meter_not_in_use": [84, 0, 255, 255]
-    #}
-  #}
+  }, "Wessex Water": {
+    "drainage": {
+      "combined": ([255, 0, 255, 255], [255, 200, 255, 255]),
+      "foul": ([0, 0, 255, 255], [100, 100, 255, 255]),
+      "surface": ([255, 112, 0, 255], [255, 165, 95, 255])
+    }, "clean": {}
+  }, "Bristol Water": {
+    "drainage": {},
+    "clean": {
+      "water_main_1-meter_in_use": [255, 0, 0, 255],
+      "water_main_2": [255, 255, 0, 255],
+      "supply_pipe-private_main": [0, 0, 255, 255],
+      "abandoned": [157, 157, 157, 255],
+      "common_pipe": [245, 0, 122, 255],
+      "hydrant": [0, 178, 0, 255],
+      "fire_hydrant": [211, 0, 255, 255],
+      "meter_not_in_use": [84, 0, 255, 255]
+    }
+  }
 }

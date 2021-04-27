@@ -5,12 +5,12 @@ from tkinter import Tk, filedialog
 from win10toast import ToastNotifier
 import fitz
 
-from src import variables, pdf_processor, state_manager, img_utils
-from src.variables import Env
-from src.pdf_processor import PdfProcessor
-from src.tk_overlay import TkOverlay
-from src.con29r_menu import Con29RMenu
-from src.confirm_menu import ConfirmMenu
+from src.menus.con29r_menu import Con29RMenu
+from src.menus.confirm_menu import ConfirmMenu
+
+from src.lib.variables import Env
+from src.lib.pdf_processor import PdfProcessor
+from src.lib.tk_overlay import TkOverlay
 
 class Form:
 
@@ -47,7 +47,7 @@ class Form:
   def generate_con29r(self, roads):
 
     pdf_path = path.join(Env.index_dir, "pdf_templates/con29r_template.pdf")
-    self.pdf_process = PdfProcessor(pdf_path)
+    self.PdfProcess = PdfProcessor(pdf_path)
 
     data = self.data
 
@@ -65,14 +65,14 @@ class Form:
       { "document_id": "enquiries 2.1 & 3.6 are required (max 3)", "value": "\n".join(roads), "location": "below" }
     )
 
-    self.insert_fields(fields, "con29r", self.pdf_process)
+    self.insert_fields(fields, "con29r", self.PdfProcess)
 
     self.save_pdf()
 
   def generate_llc1(self):
 
     pdf_path = path.join(Env.index_dir, "pdf_templates/llc1_template.pdf")
-    self.pdf_process = PdfProcessor(pdf_path)
+    self.PdfProcess = PdfProcessor(pdf_path)
 
     data = self.data
 
@@ -85,14 +85,14 @@ class Form:
       { "document_id": "Description of land sufficient to enable it to be identified.", "value": self.format_address(data["property"]), "location": "below" }
     )
 
-    self.insert_fields(fields, "llc1", self.pdf_process)
+    self.insert_fields(fields, "llc1", self.PdfProcess)
 
     self.save_pdf()
       
   def generate_con29o(self):
 
     pdf_path = path.join(Env.index_dir, "pdf_templates/con29o_template.pdf")
-    self.pdf_process = PdfProcessor(pdf_path)
+    self.PdfProcess = PdfProcessor(pdf_path)
 
     data = self.data
 
@@ -110,7 +110,7 @@ class Form:
         "document_id": f"{enquiry}.", "value": "X     ", "location": "before"
       })
 
-    self.insert_fields(fields, "con29o", self.pdf_process)
+    self.insert_fields(fields, "con29o", self.PdfProcess)
 
     self.save_pdf()
 
@@ -124,7 +124,7 @@ class Form:
   def save_pdf(self):
     save_dir = self.prompt_user_to_save()
     if len(save_dir) == 0: return None
-    self.pdf_process.pdf.save(save_dir, deflate=True)
+    self.PdfProcess.pdf.save(save_dir, deflate=True)
     self.form_generated_notification(self.form_type.upper(), save_dir)
 
   def prompt_user_to_save(self):
@@ -153,14 +153,14 @@ class Form:
     "flatNumber", "houseName", "houseNumber", "street", "addressLine2", "locality", "town", "county", "postCode"
   )
 
-  def insert_fields(self, fields, form_type, pdf_process):
+  def insert_fields(self, fields, form_type, PdfProcess):
     for _, field in enumerate(fields):
       document_id = field["document_id"]
       value = field["value"].upper()
       location = field["location"]
       index = field["index"] if "index" in field else 0
 
-      rect = pdf_process.find_text(document_id, index=index)
+      rect = PdfProcess.find_text(document_id, index=index)
 
       if rect is None:
         continue
@@ -181,7 +181,7 @@ class Form:
         point = ( rect.x1 - rect.width - text_length, rect.y0 - 1 )
 
       rect = fitz.Rect(point[0], point[1], point[0] + max_width, point[1] + 200)
-      pdf_process.insert_textbox(value, rect, fontsize=9)
+      PdfProcess.insert_textbox(value, rect, fontsize=9)
 
   def format_address(self, propertyInfo):
     address = ""

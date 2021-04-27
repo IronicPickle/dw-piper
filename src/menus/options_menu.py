@@ -1,6 +1,6 @@
 from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar, FLAT
 
-from src import state_manager
+from src.lib import state_manager
 
 class OptionsMenu:
 
