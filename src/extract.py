@@ -29,6 +29,9 @@ class Extract:
     state_manager.update(state, { "map_path": path.dirname(map_path) })
 
     PdfProcess = PdfProcessor(map_path)
+    PdfProcess.extract_imgs()
+
+    return None
     img_pix = PdfProcess.extract_img(16)
 
     img_path = path.join(Env.appdata_path, "images/initial.png")

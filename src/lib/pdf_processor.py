@@ -12,6 +12,15 @@ class PdfProcessor:
     except:
       return False
 
+  def extract_imgs(self):
+    imgs_info = self.pdf[0].get_images()
+    imgs = []
+
+    for i, img_info in enumerate(imgs_info):
+      imgs.append(fitz.Pixmap(self.pdf, img_info[0]))
+
+    return imgs
+
   def insert_img(self, img_path, rect_dims, page_no):
     map_rect = fitz.Rect((
       rect_dims[0], rect_dims[1],

@@ -8,9 +8,9 @@ from urllib.request import urlopen
 import requests
 
 import zc.lockfile as lockfile
-from win10toast import ToastNotifier
 
 from src.lib.variables import Env
+from src.lib.utils import Utils
 
 from src.menus.main_menu import MainMenu
 
@@ -36,10 +36,9 @@ def main():
   try:
     lock = lockfile.LockFile(path.join(Env.appdata_path, "duct"))
   except lockfile.LockError:
-    ToastNotifier().show_toast("Duct is already running",
-      "You can only have one instance of Duct running at any time",
-      icon_path=path.join(Env.index_dir, "images/icon.ico"),
-      duration=3
+    Utils.send_toast(
+      "Duct is already running",
+      "You can only have one instance of Duct running at any time"
     )
     return print("Duct is already running")
 
@@ -116,11 +115,9 @@ def get_mapping(url):
     return None
 
 def mapping_download_error(url):
-  ToastNotifier().show_toast("Map download failed",
-    f"Could not download mapping from: {url}",
-    icon_path=path.join(Env.index_dir, "images/icon.ico"),
-    duration=3,
-    threaded=True
+  Utils.send_toast(
+    "Map download failed",
+    f"Could not download mapping from: {url}"
   )
 
 def form(options):
