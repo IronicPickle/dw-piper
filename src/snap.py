@@ -31,13 +31,13 @@ class Snap(TkOverlay):
     state = state_manager.get()
     self.initial_x = 0
     self.initial_y = 0
-    self.previous_rotation = int(state["rotation"])
+    self.previous_rotation = int(state["rotation"] if "rotation" in state else 0)
 
     self.water_company = water_company
-    self.capture_x = int(state["x"])
-    self.capture_y = int(state["y"])
-    self.capture_size = int(state["size"])
-    self.capture_rotation = int(state["rotation"])
+    self.capture_x = int(state["x"] if "x" in state else 0)
+    self.capture_y = int(state["y"] if "y" in state else 0)
+    self.capture_size = int(state["size"] if "size" in state else 0)
+    self.capture_rotation = int(state["rotation"] if "rotation" in state else 0)
 
     self.pipe_type = pipe_type
     self.img_path = path.join(Env.appdata_path, f"images/{pipe_type}.png")
@@ -179,8 +179,7 @@ class Snap(TkOverlay):
     self.save_state()
 
   def save_state(self):
-    state = state_manager.get()
-    state_manager.update(state, {
+    state_manager.update({
       "x": self.capture_x,
       "y": self.capture_y,
       "size": self.capture_size
@@ -249,7 +248,7 @@ class Snap(TkOverlay):
 
     output_path = map_path = FilePromptSave(
       f"Save {self.pipe_type} PDF file", state["save_dir"] if "save_dir" in state else "/",
-      [("PDF File", "*.pdf")], ".pdf", state["reference"] + (" CC" if self.pipe_type == "clean" else " DD")
+      [("PDF File", "*.pdf")], ".pdf", state["reference"] if "reference" in state else "" + (" CC" if self.pipe_type == "clean" else " DD")
     ).path
 
     if output_path:

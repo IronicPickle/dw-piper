@@ -97,8 +97,7 @@ class SnapMenu(TkOverlay):
 
 
   def on_back_destroy(self):
-    state = state_manager.get()
-    state_manager.update(state, { "water_company": self.water_company.get() })
+    state_manager.update({ "water_company": self.water_company.get() })
 
   def start_clean(self):
     self.back_frame.destroy()

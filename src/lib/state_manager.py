@@ -13,7 +13,7 @@ def get():
   with open(state_path, "r", encoding="utf-8") as state_file:
     return json.loads(state_file.read())
 
-def update(state, updates):
+def update(updates, state = get()):
   with open(state_path, "w", encoding="utf-8") as state_file:
     for i in updates:
       state[i] = updates[i]

@@ -1,5 +1,5 @@
 from os import path
-from tkinter import Tk, Frame, Label, LEFT, TOP
+from tkinter import Tk, Frame, Label, LEFT, RIGHT, TOP
 
 from PIL import Image, ImageTk
 
@@ -23,89 +23,121 @@ class MainMenu(TkOverlay):
     self.generate_header()
     self.generate_title("Choose an Option")
 
-    self.resize(450, 450)
+    self.resize(800, 800)
 
     self.root.bind("<Key>", self.key_press)
 
+    self.source_frame = Frame(self.front_frame, bg="#212121")
+    self.source_frame.pack(side=TOP, pady=(0, 20))
 
-    self.generate_sub_title(self.front_frame, "Image Source")
-    
-    self.button_frame_top = Label(self.front_frame, bg="#212121")
-    self.button_frame_top.pack(side=TOP)
-    
-    self.generate_button("Extract", self.start_extract, self.button_frame_top)
-    self.generate_button("Capture", self.start_capture, self.button_frame_top)
+    self.left_frame = Frame(self.source_frame, bg="#212121")
+    self.left_frame.pack(side=LEFT, padx=10)
 
+    self.right_frame = Frame(self.source_frame, bg="#212121")
+    self.right_frame.pack(side=RIGHT, padx=10)
+
+    self.generate_sub_title(self.left_frame, "DW Source")
+    self.generate_sub_title(self.right_frame, "Map Source")
+
+    self.generate_divider(self.left_frame)
+    self.generate_divider(self.right_frame)
+
+    dw_img_path = path.join(Env.appdata_path, "images/dw_source.png")
+    map_img_path = path.join(Env.appdata_path, "images/map_source.png")
+    no_img_path = path.join(Env.index_dir, "images/no_image.png")
+
+    dw_img_pil = Image.open(dw_img_path) if path.exists(dw_img_path) else Image.open(no_img_path)
+    map_img_pil = Image.open(map_img_path) if path.exists(map_img_path) else Image.open(no_img_path)
+
+    dw_img_tk = ImageTk.PhotoImage(dw_img_pil)
+    map_img_tk = ImageTk.PhotoImage(map_img_pil)
+
+    self.generate_img(self.left_frame, dw_img_tk)
+    self.generate_img(self.right_frame, map_img_tk)
+
+    self.generate_divider(self.left_frame)
+    self.generate_divider(self.right_frame)
+
+    left_button_label = Label(self.left_frame, bg="#212121")
+    left_button_label.pack(side=TOP)
+
+    right_button_label = Label(self.right_frame, bg="#212121")
+    right_button_label.pack(side=TOP)
+
+    self.generate_button("Capture", self.start_capture_dw, left_button_label)
+    self.generate_button("Extract", self.start_extract_dw, left_button_label)
+
+    self.generate_button("Capture", self.start_capture_map, right_button_label)
+    self.generate_button("Extract", self.start_extract_map, right_button_label)
+
+    self.generate_sub_title(self.front_frame, "Other Options")
     self.generate_divider(self.front_frame)
 
-    
-    self.generate_sub_title(self.front_frame, "Alignment and Mapping")
+    bottom_button_label = Label(self.front_frame, bg="#212121")
+    bottom_button_label.pack(side=TOP)
 
-    self.button_frame_center = Label(self.front_frame, bg="#212121")
-    self.button_frame_center.pack(side=TOP)
+    self.generate_button("Auto-Align", self.root.destroy, bottom_button_label)
+    self.generate_button("Cancel", self.root.destroy, bottom_button_label)
 
-    self.generate_button("Snap", self.start_snap, self.button_frame_center)
-    self.generate_button("Map", self.start_map, self.button_frame_center)
-    
-    self.generate_divider(self.front_frame)
-
-
-    self.generate_sub_title(self.front_frame, "Other")
-    
-    self.button_frame_bottom = Label(self.front_frame, bg="#212121")
-    self.button_frame_bottom.pack(side=TOP)
-
-    self.generate_button("Auto-Align", self.start_align, self.button_frame_bottom)
-    self.generate_button("Cancel", self.root.destroy, self.button_frame_bottom)
-
-    self.generate_divider(self.front_frame)
 
     self.root.after(1, self.root.focus_force)
 
     self.root.mainloop()
 
   def generate_sub_title(self, frame, text = "Unnamed"):
-    self.button_title_label = Label(
+    title_label = Label(
       frame, text=text,
       font=("Courier", 12),
       bg="#212121", fg="#bbb"
     )
-    self.button_title_label.pack(side=TOP, pady=(20, 5))
+    title_label.pack(side=TOP, pady=(20, 5))
+    return title_label
   
   def generate_divider(self, frame):
-    self.button_divider1_frame = Frame(
+    divider_frame = Frame(
       frame, bg="white",
-      width=250, height=1
+      width=300, height=1
     )
-    self.button_divider1_frame.pack(side=TOP, pady=(5, 5))
+    divider_frame.pack(side=TOP, pady=10)
+    return divider_frame
 
-  def start_extract(self):
+
+  def generate_img(self, frame, img_tk):
+    img_frame = Frame(
+      frame,
+      highlightthickness=1,
+      highlightcolor="#fff"
+    )
+    img_frame.pack(side=TOP)
+    img_label = Label(
+      img_frame, bg="white",
+      image=img_tk,
+      borderwidth=0,
+      width=250, height=250
+    )
+    img_label.image = img_tk
+    img_label.pack(side=TOP)
+    return img_label
+
+  def start_capture_dw(self):
+    self.back_frame.destroy()
+    Capture(self.root, "dw")
+
+  def start_extract_dw(self):
     self.root.destroy()
-    Extract()
+    Extract("dw")
 
-  def start_capture(self):
+  def start_capture_map(self):
     self.back_frame.destroy()
-    Capture(self.root)
-    
-  def start_align(self):
-    self.back_frame.destroy()
-    Align(self.root)
+    Capture(self.root, "map")
 
-  def start_snap(self):
-    self.back_frame.destroy()
-    SnapMenu(self.root)
-
-  def start_map(self):
-    self.back_frame.destroy()
-    Map(self.root)
+  def start_extract_map(self):
+    self.root.destroy()
+    Extract("dw")
 
   def key_press(self, event):
     key_events = {
-      27: self.root.destroy,
-      85: self.start_extract,
-      67: self.start_capture,
-      65: self.start_align,
-      77: self.start_map
+      27: self.root.destroy
     }
     try:
       key_events[event.keycode]()

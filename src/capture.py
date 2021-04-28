@@ -14,11 +14,17 @@ from src.lib.variables import Env
 class Capture(TkOverlay):
   mouse_start = {"x": 0, "y": 0}
 
-  def __init__(self, root = None):
+  def __init__(self, root = None, source = None):
 
     super().__init__(root)
 
-    self.img_path = path.join(Env.appdata_path, f"images/initial.png")
+    if not [ "dw", "map" ].__contains__(source):
+      return
+
+    self.source = source
+    self.source_name = { "dw": "DW", "map": "Map" }[source]
+
+    self.img_path = path.join(Env.appdata_path, f"images/{source}_source.png")
 
     self.generate_frames()
 
@@ -119,38 +125,36 @@ class Capture(TkOverlay):
     box_size = self.selection_frame.winfo_width()
     self.root.withdraw()
 
-    self.initial_img_pil = pyautogui.screenshot(region=(
+    source_img_pil = pyautogui.screenshot(region=(
       capture_x, capture_y,
       box_size, box_size
     ))
 
     Utils.send_toast(
       f"Screenshot taken at: {capture_x}, {capture_y}",
-      f"Size: {box_size} x {box_size}"
+      f"Size: {box_size} x {box_size}", duration=2
     )
     print(f"Initial screenshot taken at: {capture_x}, {capture_y}\n  Size: {box_size} x {box_size}")
 
     self.back_frame.destroy()
     self.root.deiconify()
 
-    options_menu = OptionsMenu(self.root, self.initial_img_pil)
+    options_menu = OptionsMenu(self.root, self.source, source_img_pil)
     if options_menu.cancelled:
       return None
 
-    initial_path = path.join(Env.appdata_path, "images/initial.png")
-    if(path.exists(initial_path)):
-      Path(path.join(Env.appdata_path, "images")).mkdir(parents=True, exist_ok=True)
-      self.initial_img_pil.save(initial_path)
+    source_img_path = path.join(Env.appdata_path, f"images/{self.source}_source.png")
+    Path(path.join(Env.appdata_path, "images")).mkdir(parents=True, exist_ok=True)
+    source_img_pil.save(source_img_path)
 
-    state = state_manager.get()
-    state_manager.update(state, {
+    state_manager.update({
       "x": int((Env.res_x / 2) - (box_size / 2)),
       "y": int((Env.res_y / 2) - (box_size / 2)),
       "size": box_size, "rotation": 0
     })
 
     Utils.send_toast(
-      "Capture complete", "You can now align the image"
+      "Capture complete", "You can now align the image", duration=2
     )
 
   def key_press(self, event):

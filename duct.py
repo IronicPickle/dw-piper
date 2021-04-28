@@ -99,7 +99,7 @@ def extract(options):
   map_path = None
   if url: map_path = get_mapping(url)
 
-  Extract(map_path, ref)
+  Extract("map", map_path, 16, ref)
 
 def get_mapping(url):
   map_path = path.join(Env.appdata_path, "mapping.pdf")

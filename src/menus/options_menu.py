@@ -9,15 +9,20 @@ from src.lib.variables import Env
 
 class OptionsMenu(TkOverlay):
 
-  def __init__(self, root = None, initial_img_pil = None):
+  def __init__(self, root = None, source = None, initial_img_pil = None):
 
     super().__init__(root)
+
+    if not [ "dw", "map" ].__contains__(source):
+      return
+
+    self.source = source
+    self.source_name = { "dw": "DW", "map": "Map" }[source]
 
     self.cancelled = False
 
     self.reference = StringVar()
-    state = state_manager.get()
-    state_manager.update(state, { "reference": "" })
+    state_manager.update({ "reference": "" })
 
     self.generate_frames()
     self.generate_header()
@@ -30,25 +35,26 @@ class OptionsMenu(TkOverlay):
     self.initial_img_pil = initial_img_pil
     if self.initial_img_pil is None:
       self.initial_img_pil = Image.open(
-        path.join(Env.appdata_path, "images/initial.png")
+        path.join(Env.appdata_path, f"images/{source}.png")
       )
 
-    self.initial_img_tk = ImageTk.PhotoImage(
-      self.initial_img_pil.resize((300, 300), Image.BILINEAR)
-    )
+    self.source_img_tk = ImageTk.PhotoImage(self.initial_img_pil)
 
-    self.image_frame = Frame(
-      self.front_frame, highlightthickness=1, highlightcolor="#fff"
+    self.img_frame = Frame(
+      self.front_frame,
+      highlightthickness=1,
+      highlightcolor="#fff"
     )
-    self.image_frame.pack(side=TOP, pady=(10))
+    self.img_frame.pack(side=TOP, pady=(10))
 
     self.image_label = Label(
-      self.image_frame,
-      image=self.initial_img_tk,
+      self.img_frame,
+      image=self.source_img_tk,
       bg="#212121",
-      borderwidth=0
+      borderwidth=0,
+      width=300, height=300
     )
-    self.image_label.image = self.initial_img_tk
+    self.image_label.image = self.source_img_tk
     self.image_label.pack()
 
     self.generate_title("Input a Reference")
@@ -99,7 +105,4 @@ class OptionsMenu(TkOverlay):
       pass
 
 def save_ref(ref):
-  state = state_manager.get()
-  state_manager.update(state, {
-    "reference": ref
-  })
+  state_manager.update({ "reference": ref })

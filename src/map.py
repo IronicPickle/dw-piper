@@ -20,12 +20,12 @@ class Map:
     state = state_manager.get()
     self.initial_x = 0
     self.initial_y = 0
-    self.previous_rotation = int(state["rotation"])
+    self.previous_rotation = int(state["rotation"] if "rotation" in state else 0)
 
-    self.capture_x = int(state["x"])
-    self.capture_y = int(state["y"])
-    self.capture_size = int(state["size"])
-    self.capture_rotation = int(state["rotation"])
+    self.capture_x = int(state["x"] if "x" in state else 0)
+    self.capture_y = int(state["y"] if "y" in state else 0)
+    self.capture_size = int(state["size"] if "size" in state else 0)
+    self.capture_rotation = int(state["rotation"] if "rotation" in state else 0)
 
     tk_overlay.generate_frames()
 
@@ -192,8 +192,7 @@ class Map:
     doubleClick(x=mouse_x, y=mouse_y)
 
   def save_state(self):
-    state = state_manager.get()
-    state_manager.update(state, {
+    state_manager.update({
       "x": self.capture_x,
       "y": self.capture_y,
       "size": self.capture_size,

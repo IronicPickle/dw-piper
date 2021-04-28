@@ -12,7 +12,7 @@ class Utils:
     notifier.show_toast(title,
       sub_title,
       icon_path=path.join(Env.index_dir, "images/icon.ico"),
-      duration=3,
+      duration=duration,
       threaded=threaded
     )
 
