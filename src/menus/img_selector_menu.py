@@ -3,6 +3,7 @@ from tkinter import Label, Frame, TOP
 from PIL import ImageTk
 
 from src.lib.tk_overlay import TkOverlay
+from src.lib.img_utils import resize_img
 
 class ImgSelectorMenu(TkOverlay):
   def __init__(self, root = None, pil_imgs = []):
@@ -19,8 +20,6 @@ class ImgSelectorMenu(TkOverlay):
 
     self.root.bind("<Key>", self.key_press)
 
-    self.cancelled = False
-
     self.img_frame = Frame(
       self.front_frame,
       highlightthickness=1,
@@ -28,12 +27,15 @@ class ImgSelectorMenu(TkOverlay):
     )
     self.img_frame.pack(side=TOP, pady=10)
 
+    self.img_width = 500
+    self.img_height = 500
+
     self.current_img = 0
 
     self.pil_imgs = pil_imgs
     self.tk_imgs = []
     for i, pil_img in enumerate(pil_imgs):
-      img_tk = ImageTk.PhotoImage(pil_img)
+      img_tk = ImageTk.PhotoImage(resize_img(pil_img, self.img_width, self.img_height))
       self.tk_imgs.append(img_tk)
 
     self.total_imgs = len(self.tk_imgs)
@@ -41,10 +43,11 @@ class ImgSelectorMenu(TkOverlay):
       return
 
     self.img_label = Label(
-      self.img_frame, bg="white",
+      self.img_frame,
       image=self.tk_imgs[self.current_img],
+      bg="#212121",
       borderwidth=0,
-      width=300, height=300
+      width=self.img_width, height=self.img_height
     )
     self.img_label.image = img_tk
     self.img_label.pack(side=TOP)
@@ -55,9 +58,9 @@ class ImgSelectorMenu(TkOverlay):
     )
     self.button_frame.pack(side=TOP)
 
+    self.generate_button("Select", self.select, self.button_frame)
     self.generate_button("Previous", self.prev_img, self.button_frame)
     self.generate_button("Next", self.next_img, self.button_frame)
-    self.generate_button("Select", self.select, self.button_frame)
     self.generate_button("Cancel", self.cancel, self.button_frame)
 
     self.root.after(1, self.root.focus_force)

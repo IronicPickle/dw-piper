@@ -1,15 +1,16 @@
 from os import path
-from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar, FLAT
+from tkinter import Frame, Label, Entry, TOP, CENTER, StringVar, FLAT
 
 from PIL import Image, ImageTk
 
 from src.lib import state_manager
 from src.lib.tk_overlay import TkOverlay
 from src.lib.variables import Env
+from src.lib.img_utils import resize_img
 
 class OptionsMenu(TkOverlay):
 
-  def __init__(self, root = None, source = None, initial_img_pil = None):
+  def __init__(self, root = None, source = None, source_img_pil = None):
 
     super().__init__(root)
 
@@ -32,18 +33,24 @@ class OptionsMenu(TkOverlay):
 
     self.root.bind("<Key>", self.key_press)
 
-    self.initial_img_pil = initial_img_pil
-    if self.initial_img_pil is None:
-      self.initial_img_pil = Image.open(
+    self.img_width = 300
+    self.img_height = 300
+
+    self.source_img_pil = source_img_pil
+    if self.source_img_pil is None:
+      self.source_img_pil = Image.open(
         path.join(Env.appdata_path, f"images/{source}.png")
       )
+    
+    self.source_img_pil = resize_img(self.source_img_pil, self.img_width, self.img_height)
 
-    self.source_img_tk = ImageTk.PhotoImage(self.initial_img_pil)
+    self.source_img_tk = ImageTk.PhotoImage(self.source_img_pil)
 
     self.img_frame = Frame(
       self.front_frame,
       highlightthickness=1,
-      highlightcolor="#fff"
+      highlightcolor="#fff",
+      bg="#212121"
     )
     self.img_frame.pack(side=TOP, pady=(10))
 
@@ -52,7 +59,7 @@ class OptionsMenu(TkOverlay):
       image=self.source_img_tk,
       bg="#212121",
       borderwidth=0,
-      width=300, height=300
+      width=self.img_width, height=self.img_height
     )
     self.image_label.image = self.source_img_tk
     self.image_label.pack()

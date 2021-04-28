@@ -14,6 +14,8 @@ class TkOverlay:
     self.root = Tk() if root is None else root
     self.log("Root > Started")
 
+    self.cancelled = False
+
     self.root.attributes("-fullscreen", False)
     self.root.attributes("-alpha", 1)
     self.root.attributes("-topmost", True)
@@ -41,6 +43,7 @@ class TkOverlay:
     self.root.bind("<Destroy>", self.on_destroy_static)
 
   def on_close(self):
+    self.cancelled = True
     self.root.destroy()
 
   def on_destroy_static(self, event):

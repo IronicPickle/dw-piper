@@ -1,17 +1,14 @@
 from os import path
-from tkinter import Tk, Frame, Label, LEFT, RIGHT, TOP
+from tkinter import Frame, Label, LEFT, RIGHT, TOP
 
 from PIL import Image, ImageTk
 
 from src.extract import Extract
 from src.capture import Capture
-from src.align import Align
-from src.map import Map
-
-from src.menus.snap_menu import SnapMenu
 
 from src.lib.tk_overlay import TkOverlay
 from src.lib.variables import Env
+from src.lib.img_utils import resize_img
 
 class MainMenu(TkOverlay):
 
@@ -42,12 +39,18 @@ class MainMenu(TkOverlay):
     self.generate_divider(self.left_frame)
     self.generate_divider(self.right_frame)
 
+    self.img_width = 250
+    self.img_height = 250
+
     dw_img_path = path.join(Env.appdata_path, "images/dw_source.png")
     map_img_path = path.join(Env.appdata_path, "images/map_source.png")
     no_img_path = path.join(Env.index_dir, "images/no_image.png")
 
     dw_img_pil = Image.open(dw_img_path) if path.exists(dw_img_path) else Image.open(no_img_path)
     map_img_pil = Image.open(map_img_path) if path.exists(map_img_path) else Image.open(no_img_path)
+
+    dw_img_pil = resize_img(dw_img_pil, self.img_width, self.img_height)
+    map_img_pil = resize_img(map_img_pil, self.img_width, self.img_height)
 
     dw_img_tk = ImageTk.PhotoImage(dw_img_pil)
     map_img_tk = ImageTk.PhotoImage(map_img_pil)
@@ -106,14 +109,16 @@ class MainMenu(TkOverlay):
     img_frame = Frame(
       frame,
       highlightthickness=1,
-      highlightcolor="#fff"
+      highlightcolor="#fff",
+      bg="#212121"
     )
     img_frame.pack(side=TOP)
     img_label = Label(
-      img_frame, bg="white",
+      img_frame,
       image=img_tk,
+      bg="#212121",
       borderwidth=0,
-      width=250, height=250
+      width=self.img_width, height=self.img_height
     )
     img_label.image = img_tk
     img_label.pack(side=TOP)
