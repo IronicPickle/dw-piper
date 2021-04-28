@@ -23,7 +23,8 @@ class OptionsMenu(TkOverlay):
     self.cancelled = False
 
     self.reference = StringVar()
-    state_manager.update({ "reference": "" })
+    if source == "map":
+      state_manager.update({ "reference": "" })
 
     self.generate_frames()
     self.generate_header()
@@ -64,21 +65,21 @@ class OptionsMenu(TkOverlay):
     self.image_label.image = self.source_img_tk
     self.image_label.pack()
 
-    self.generate_title("Input a Reference")
+    if source == "map":
+      self.generate_title("Input a Reference")
 
-
-    self.reference_entry = Entry(
-      self.front_frame,
-      font=("Courier", 12),
-      textvariable=self.reference,
-      bg="#212121",
-      fg="white",
-      insertbackground="white",
-      justify=CENTER,
-      highlightthickness=1,
-      relief=FLAT
-    )
-    self.reference_entry.pack(side=TOP, pady=10)
+      self.reference_entry = Entry(
+        self.front_frame,
+        font=("Courier", 12),
+        textvariable=self.reference,
+        bg="#212121",
+        fg="white",
+        insertbackground="white",
+        justify=CENTER,
+        highlightthickness=1,
+        relief=FLAT
+      )
+      self.reference_entry.pack(side=TOP, pady=10)
 
     self.button_frame = Label(
       self.front_frame,
@@ -89,7 +90,8 @@ class OptionsMenu(TkOverlay):
     self.generate_button("Submit", self.submit, self.button_frame)
     self.generate_button("Cancel", self.cancel, self.button_frame)
 
-    self.root.after(1, self.reference_entry.focus)
+    if source == "map":
+      self.root.after(1, self.reference_entry.focus)
 
     self.root.mainloop()
 
@@ -98,7 +100,8 @@ class OptionsMenu(TkOverlay):
     self.root.destroy()
 
   def submit(self):
-    save_ref(self.reference.get())
+    if self.source == "map":
+      state_manager.update({ "reference": self.reference.get() })
     self.root.destroy()
 
   def key_press(self, event):
@@ -110,6 +113,3 @@ class OptionsMenu(TkOverlay):
       key_events[event.keycode]()
     except:
       pass
-
-def save_ref(ref):
-  state_manager.update({ "reference": ref })

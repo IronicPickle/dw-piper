@@ -138,7 +138,7 @@ class MainMenu(TkOverlay):
 
   def start_extract_map(self):
     self.root.destroy()
-    Extract("dw")
+    Extract("map")
 
   def key_press(self, event):
     key_events = {

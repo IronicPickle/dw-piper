@@ -8,12 +8,14 @@ def crop_img(img_path, crop_x, crop_y, crop_dx, crop_dy):
 
 def resize_img(img_pil, width, height, mode = "cover"):
   initial_width, initial_height = img_pil.size
-  ratio = width / height
+
+  ratio = initial_width / initial_height
+
   new_width, new_height = ( width, height )
   if mode == "cover":
     if initial_width > initial_height:
-      new_height = int(initial_height / ratio)
+      new_height = int(new_height / ratio)
     elif initial_height > initial_width:
-      new_width = int(initial_width / ratio)
+      new_width = int(new_width * ratio)
   
-  return img_pil.resize(( new_width, new_height ), Image.LANCZOS)
+  return img_pil.resize(( int(new_width), int(new_height) ), Image.LANCZOS)

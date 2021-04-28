@@ -13,11 +13,14 @@ class PdfProcessor:
       return False
 
   def extract_imgs(self):
-    imgs_info = self.pdf[0].get_images()
     imgs = []
 
-    for i, img_info in enumerate(imgs_info):
-      imgs.append(fitz.Pixmap(self.pdf, img_info[0]))
+    for i, page in enumerate(self.pdf):
+
+      imgs_info = page.get_images()
+
+      for ii, img_info in enumerate(imgs_info):
+        imgs.append(fitz.Pixmap(self.pdf, img_info[0]))
 
     return imgs
 

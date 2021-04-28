@@ -71,8 +71,9 @@ class Extract:
         "Input a reference to continue"
       )
       option_menu = OptionsMenu(None, source, img_pil)
-      if option_menu.cancelled: return
-      ref = option_menu.reference.get()
+      if option_menu.cancelled:
+        return
+
     else:
       state_manager.update({ "reference": ref })
   
