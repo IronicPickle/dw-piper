@@ -39,8 +39,8 @@ class MainMenu(TkOverlay):
     self.generate_divider(self.left_frame)
     self.generate_divider(self.right_frame)
 
-    self.img_width = 250
-    self.img_height = 250
+    self.img_width = 300
+    self.img_height = 300
 
     dw_img_path = path.join(Env.appdata_path, "images/dw_source.png")
     map_img_path = path.join(Env.appdata_path, "images/map_source.png")
@@ -99,7 +99,7 @@ class MainMenu(TkOverlay):
   def generate_divider(self, frame):
     divider_frame = Frame(
       frame, bg="white",
-      width=300, height=1
+      width=350, height=1
     )
     divider_frame.pack(side=TOP, pady=10)
     return divider_frame
