@@ -41,6 +41,24 @@ class TkOverlay:
     self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
     self.root.bind("<Destroy>", self.on_destroy_static)
+    self.root.bind("<Key>", lambda event: self.key_press(event))
+    self.root.bind("<Control-Key>", lambda event: self.key_press(event, "ctrl"))
+    self.root.bind("<Shift-Key>", lambda event: self.key_press(event, "shift"))
+
+    self.key_events = {
+      "none": { 27: self.root.destroy },
+      "ctrl": {}, "shift": {}
+    }
+
+  def key_press(self, event, mod = "none"):
+    print(f"Key Press: {mod} + {event.keycode}")
+    if mod in self.key_events and event.keycode in self.key_events[mod]:
+      self.key_events[mod][event.keycode]()
+
+  def register_key_event(self, key, function, mod = "none"):
+    if mod not in self.key_events:
+      raise Exception(f"{mod} not a valid key modifier")
+    self.key_events[mod][key] = function
 
   def on_close(self):
     self.cancelled = True
@@ -83,7 +101,7 @@ class TkOverlay:
 
   def generate_frames(self):
 
-    self.back_frame = Frame(self.root, bg="#212121")
+    self.back_frame = Frame(self.root, bg=Env.bg)
     self.back_frame.pack(
       fill="both",
       expand=True
@@ -91,7 +109,7 @@ class TkOverlay:
 
     self.log("Back Frame > Started")
 
-    self.front_frame = Frame(self.back_frame, bg="#212121")
+    self.front_frame = Frame(self.back_frame, bg=Env.bg)
     self.front_frame.place(anchor="center", relx=0.5, rely=0.5)
 
   def generate_header(self):
@@ -101,14 +119,14 @@ class TkOverlay:
 
     self.title_frame = Frame(
       self.front_frame,
-      bg="#212121"
+      bg=Env.bg
     )
     self.title_frame.pack(side=TOP)
 
     self.title_icon_label = Label(
       self.title_frame,
       image=self.title_icon_photoimage,
-      bg="#212121",
+      bg=Env.bg,
       borderwidth=0
     )
     self.title_icon_label.pack(side=LEFT)
@@ -118,8 +136,8 @@ class TkOverlay:
       text="Duct",
       font=("Courier", 20),
       pady=10,
-      bg="#212121",
-      fg="white"
+      bg=Env.bg,
+      fg=Env.fg
     )
     self.title_label.pack(side=LEFT, padx=(20, 0))
 
@@ -129,14 +147,14 @@ class TkOverlay:
       text=title,
       font=("Courier", 16),
       pady=10,
-      bg="#212121",
-      fg="white"
+      bg=Env.bg,
+      fg=Env.fg
     )
     self.sub_title_label.pack(side=TOP)
 
     self.divider_frame = Frame(
       self.front_frame,
-      bg="white",
+      bg=Env.div,
       width=120,
       height=1
     )
@@ -144,14 +162,11 @@ class TkOverlay:
 
   def generate_button(self, name, command, frame):
     button = Button(
-      frame,
-      text=name,
+      frame, text=name,
       font=("Courier", 12),
-      command=command,
       cursor="hand2",
-      bd=0,
-      bg="#212121",
-      fg="white"
+      bd=0, bg=Env.bg, fg=Env.fg,
+      command=command
     )
     button.pack(side=LEFT, padx=10)
     return button

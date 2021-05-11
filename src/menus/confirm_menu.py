@@ -1,6 +1,7 @@
 from tkinter import Frame, Label, Button, LEFT, TOP
 
 from src.lib.tk_overlay import TkOverlay
+from src.lib.variables import Env
 
 class ConfirmMenu(TkOverlay):
 
@@ -18,7 +19,7 @@ class ConfirmMenu(TkOverlay):
 
     self.button_frame = Label(
       self.front_frame,
-      bg="#212121"
+      bg=Env.bg
     )
     self.button_frame.pack(side=TOP)
 

@@ -50,15 +50,15 @@ class OptionsMenu(TkOverlay):
     self.img_frame = Frame(
       self.front_frame,
       highlightthickness=1,
-      highlightcolor="#fff",
-      bg="#212121"
+      highlightcolor=Env.border,
+      bg=Env.bg
     )
     self.img_frame.pack(side=TOP, pady=(10))
 
     self.image_label = Label(
       self.img_frame,
       image=self.source_img_tk,
-      bg="#212121",
+      bg=Env.bg,
       borderwidth=0,
       width=self.img_width, height=self.img_height
     )
@@ -72,9 +72,9 @@ class OptionsMenu(TkOverlay):
         self.front_frame,
         font=("Courier", 12),
         textvariable=self.reference,
-        bg="#212121",
-        fg="white",
-        insertbackground="white",
+        bg=Env.bg,
+        fg=Env.fg,
+        insertbackground=Env.fg,
         justify=CENTER,
         highlightthickness=1,
         relief=FLAT
@@ -83,7 +83,7 @@ class OptionsMenu(TkOverlay):
 
     self.button_frame = Label(
       self.front_frame,
-      bg="#212121"
+      bg=Env.bg
     )
     self.button_frame.pack(side=TOP)
 

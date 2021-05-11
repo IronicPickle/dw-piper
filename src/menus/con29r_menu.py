@@ -1,6 +1,7 @@
 from tkinter import Frame, Label, Button, Entry, LEFT, TOP, CENTER, StringVar, FLAT
 
 from src.lib.tk_overlay import TkOverlay
+from src.lib.variables import Env
 
 class Con29RMenu(TkOverlay):
 
@@ -31,7 +32,7 @@ class Con29RMenu(TkOverlay):
 
     self.button_frame = Label(
       self.front_frame,
-      bg="#212121"
+      bg=Env.bg
     )
     self.button_frame.pack(side=TOP)
 
@@ -47,8 +48,8 @@ class Con29RMenu(TkOverlay):
       self.front_frame,
       font=("Courier", 12),
       textvariable=road_variable,
-      bg="#212121",
-      fg="white" if state == "normal" else "black",
+      bg=Env.bg,
+      fg=Env.fg if state == "normal" else "black",
       insertbackground="white",
       justify=CENTER,
       highlightthickness=1,

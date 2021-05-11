@@ -4,6 +4,7 @@ from PIL import ImageTk
 
 from src.lib.tk_overlay import TkOverlay
 from src.lib.img_utils import resize_img
+from src.lib.variables import Env
 
 class ImgSelectorMenu(TkOverlay):
   def __init__(self, root = None, pil_imgs = []):
@@ -23,7 +24,7 @@ class ImgSelectorMenu(TkOverlay):
     self.img_frame = Frame(
       self.front_frame,
       highlightthickness=1,
-      highlightcolor="#fff"
+      highlightcolor=Env.border
     )
     self.img_frame.pack(side=TOP, pady=10)
 
@@ -45,7 +46,7 @@ class ImgSelectorMenu(TkOverlay):
     self.img_label = Label(
       self.img_frame,
       image=self.tk_imgs[self.current_img],
-      bg="#212121",
+      bg=Env.bg,
       borderwidth=0,
       width=self.img_width, height=self.img_height
     )
@@ -54,7 +55,7 @@ class ImgSelectorMenu(TkOverlay):
 
     self.button_frame = Label(
       self.front_frame,
-      bg="#212121"
+      bg=Env.bg
     )
     self.button_frame.pack(side=TOP)
 

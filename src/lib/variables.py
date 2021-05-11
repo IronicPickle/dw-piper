@@ -9,6 +9,10 @@ class Env:
   res_x = size()[0]
   res_y = size()[1]
   update_server_address = "https://update.lykos.uk/"
+  bg="#212121"
+  fg="#ffffff"
+  div="#ffffff"
+  border="#ffffff"
 
 WATER_COMPANIES = {
   "United Utilities": {

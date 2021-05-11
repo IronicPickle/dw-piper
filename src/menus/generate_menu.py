@@ -2,14 +2,14 @@ from os import path
 from pathlib import Path
 from tkinter import Frame, Label, Button, OptionMenu, TOP, LEFT, StringVar, FLAT
 
-from src.snap import Snap
+from src.generate import Generate
 
 from src.lib import state_manager
 from src.lib.tk_overlay import TkOverlay
 from src.lib.utils import Utils
 from src.lib.variables import Env, WATER_COMPANIES
 
-class SnapMenu(TkOverlay):
+class GenerateMenu(TkOverlay):
 
   def __init__(self, root = None):
 
@@ -21,6 +21,9 @@ class SnapMenu(TkOverlay):
       self.water_company.set(state["water_company"])
     else:
       self.water_company.set("United Utilities")
+
+    self.register_key_event(67, self.start_clean)
+    self.register_key_event(68, self.start_drainage)
 
     self.generate_frames()
     self.generate_header()
@@ -56,8 +59,8 @@ class SnapMenu(TkOverlay):
     )
     self.water_company_dropdown.config(
       font=("Courier", 12),
-      bg="#212121",
-      fg="white",
+      bg=Env.bg,
+      fg=Env.fg,
       highlightthickness=0,
       relief=FLAT
     )
@@ -68,14 +71,14 @@ class SnapMenu(TkOverlay):
       text="Choose an Option",
       font=("Courier", 16),
       pady=10,
-      bg="#212121",
-      fg="white"
+      bg=Env.bg,
+      fg=Env.fg
     )
     self.button_label.pack(side=TOP)
 
     self.divider_frame = Frame(
       self.front_frame,
-      bg="white",
+      bg=Env.div,
       width=120,
       height=1
     )
@@ -83,7 +86,7 @@ class SnapMenu(TkOverlay):
 
     self.button_frame = Label(
       self.front_frame,
-      bg="#212121"
+      bg=Env.bg
     )
     self.button_frame.pack(side=TOP)
 
@@ -101,19 +104,8 @@ class SnapMenu(TkOverlay):
 
   def start_clean(self):
     self.back_frame.destroy()
-    Snap(self.root, "clean", self.water_company.get())
+    Generate(self.root, "clean", self.water_company.get())
 
   def start_drainage(self):
     self.back_frame.destroy()
-    Snap(self.root, "drainage", self.water_company.get())
-
-  def key_press(self, event):
-    key_events = {
-      27: self.root.destroy,
-      67: self.start_clean,
-      68: self.start_drainage
-    }
-    try:
-      key_events[event.keycode]()
-    except:
-      pass
+    Generate(self.root, "drainage", self.water_company.get())

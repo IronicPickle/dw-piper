@@ -19,3 +19,6 @@ def resize_img(img_pil, width, height, mode = "cover"):
       new_width = int(new_width * ratio)
   
   return img_pil.resize(( int(new_width), int(new_height) ), Image.LANCZOS)
+
+def rotate_img(img_pil, rotation):
+  return img_pil.rotate(rotation, Image.BILINEAR, expand=True)

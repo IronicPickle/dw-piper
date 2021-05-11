@@ -14,17 +14,22 @@ from src.auto_align import auto_align
 
 from src.lib import state_manager
 from src.lib.variables import Env, WATER_COMPANIES
-from src.lib.tk_overlay import TkOverlay
+from src.lib.tk_aligner import TkAligner
 from src.lib.pdf_processor import PdfProcessor
 from src.lib.tk_resizer import TkResizer
 from src.lib.utils import Utils
 from src.lib.file_prompt import FilePromptSave
 
-class Snap(TkOverlay):
+class Generate(TkAligner):
 
   def __init__(self, root, pipe_type, water_company):
 
-    super().__init__(root)
+    dw_img_pil = Image.open(path.join(Env.appdata_path, "images/dw_source.png"))
+    map_img_pil = Image.open(path.join(Env.appdata_path, "images/map_source.png"))
+
+    super().__init__(root, dw_img_pil, map_img_pil)
+
+    self.root.mainloop()
 
     self.initial_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
 
@@ -49,7 +54,7 @@ class Snap(TkOverlay):
 
     self.image_frame = Frame(
       self.back_frame,
-      bg="#212121"
+      bg=Env.bg
     )
 
     self.Resizer = TkResizer(self.image_frame)
@@ -59,7 +64,7 @@ class Snap(TkOverlay):
     self.image_label = Label(
       self.image_frame,
       image=initial_photoimage,
-      bg="#212121",
+      bg=Env.bg,
       borderwidth=0,
       cursor="fleur"
     )
@@ -70,8 +75,8 @@ class Snap(TkOverlay):
       self.back_frame,
       text="Click and drag to align, resize and rotate",
       font=("Courier", 16),
-      bg="black",
-      fg="white",
+      bg=Env.bg,
+      fg=Env.fg,
       padx=10, pady=10
     )
     self.top_label.pack(side=TOP, pady=(100, 0))
@@ -79,8 +84,8 @@ class Snap(TkOverlay):
     self.top_info_label = Label(
       self.back_frame,
       font=("Calibri", 12),
-      bg="black",
-      fg="white",
+      bg=Env.bg,
+      fg=Env.fg,
       padx=10, pady=5
     )
     self.top_info_label.pack(side=TOP, pady=(5, 0))
@@ -89,8 +94,8 @@ class Snap(TkOverlay):
       self.back_frame,
       text="ARROW KEYS - Align\nPLUS - Enlarge\nMINUS - Shrink\n\nENTER - Confirm\nESC - Cancel",
       font=("Courier", 16),
-      bg="black",
-      fg="white",
+      bg=Env.bg,
+      fg=Env.fg,
       padx=10, pady=10
     )
     self.right_label.pack(side=RIGHT, padx=(0, 50), anchor=N)

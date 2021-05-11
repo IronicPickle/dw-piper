@@ -42,7 +42,7 @@ class Capture(TkOverlay):
 
     self.selection_frame = Frame(
       self.back_frame,
-      bg="white",
+      bg=Env.fg,
       borderwidth=2
     )
 
@@ -50,8 +50,8 @@ class Capture(TkOverlay):
       self.back_frame,
       text="Click and drag to select an area\nor press ESC to cancel",
       font=("Courier", 16),
-      bg="black",
-      fg="white",
+      bg=Env.bg,
+      fg=Env.fg,
       pady=10, padx=10
     )
     self.top_label.pack(side=TOP, pady=(100, 0))
@@ -60,8 +60,8 @@ class Capture(TkOverlay):
       self.selection_frame,
       text="0 x 0",
       font=("Courier", 16),
-      bg="#212121",
-      fg="white",
+      bg=Env.bg,
+      fg=Env.fg,
       pady=0,
       padx=5
     )

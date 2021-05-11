@@ -43,7 +43,7 @@ class Align(TkOverlay):
 
     self.image_frame = Frame(
       self.back_frame,
-      bg="#212121"
+      bg=Env.bg
     )
 
     initial_photoimage = ImageTk.PhotoImage(self.initial_img)
@@ -51,7 +51,7 @@ class Align(TkOverlay):
     self.image_label = Label(
       self.image_frame,
       image=initial_photoimage,
-      bg="#212121",
+      bg=Env.bg,
       borderwidth=0
     )
     self.image_label.image = initial_photoimage
@@ -61,8 +61,8 @@ class Align(TkOverlay):
       self.back_frame,
       text="Auto-Aligning...",
       font=("Courier", 16),
-      bg="black",
-      fg="white",
+      bg=Env.bg,
+      fg=Env.fg,
       padx=10, pady=10
     )
     self.top_label.pack(side=TOP, pady=(100, 0))

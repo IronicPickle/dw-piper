@@ -37,7 +37,7 @@ class UpdatePrompt:
       self.front_frame,
       text=f"Version: {self.latest_version}",
       font=("Courier", 12),
-      bg="#212121",
+      bg=Env.bg,
       fg="white"
     )
     self.version_label.pack(side=TOP)
@@ -46,14 +46,14 @@ class UpdatePrompt:
       self.front_frame,
       text=changelog["date"],
       font=("Courier", 8),
-      bg="#212121",
+      bg=Env.bg,
       fg="white"
     )
     self.date_label.pack(side=TOP, pady=(0, 10))
 
     self.changelog_frame = Frame(
       self.front_frame,
-      bg="#212121"
+      bg=Env.bg
     )
     self.changelog_frame.pack(side=TOP, pady=(0, 5))
 
@@ -65,8 +65,8 @@ class UpdatePrompt:
     self.changelog_listbox = Listbox(
       self.changelog_frame,
       font=("Courier", 8),
-      bg="#212121",
-      fg="white",
+      bg=Env.bg,
+      fg=Env.fg,
       width=50,
       height=8,
       xscrollcommand=self.changelog_scrollbar_x.set,
@@ -85,14 +85,14 @@ class UpdatePrompt:
       self.front_frame,
       text=f"An update is available\nWould you like to install it?",
       font=("Courier", 16),
-      bg="#212121",
-      fg="white"
+      bg=Env.bg,
+      fg=Env.fg
     )
     self.button_label.pack(side=TOP, pady=10)
 
     self.divider_frame = Frame(
       self.front_frame,
-      bg="white",
+      bg=Env.div,
       width=120,
       height=1
     )
@@ -100,7 +100,7 @@ class UpdatePrompt:
 
     self.button_frame = Label(
       self.front_frame,
-      bg="#212121"
+      bg=Env.bg
     )
     self.button_frame.pack(side=TOP)
 
@@ -119,8 +119,8 @@ class UpdatePrompt:
       command=command,
       cursor="hand2",
       bd=0,
-      bg="#212121",
-      fg="white"
+      bg=Env.bg,
+      fg=Env.fg"
     ).pack(side=LEFT, padx=10)
 
   def destroy_root(self):
