@@ -24,6 +24,11 @@ class TkAligner(TkOverlay):
 
   def __init__(self, root, dw_img_pil, map_img_pil):
 
+    if dw_img_pil is None:
+      raise Exception("dw_img_pil is not a valid PIL image")
+    if map_img_pil is None:
+      raise Exception("map_img_pil is not a valid PIL image")
+
     super().__init__(root)
 
     state = state_manager.get()
@@ -33,7 +38,7 @@ class TkAligner(TkOverlay):
 
     self.align_x = int(state["x"] if "x" in state else 0)
     self.align_y = int(state["y"] if "y" in state else 0)
-    self.align_size = int(state["size"] if "size" in state else 0)
+    self.align_size = int(state["size"] if "size" in state else 300)
     self.align_rotation = int(state["rotation"] if "rotation" in state else 0)
 
     self.generate_frames()
@@ -42,22 +47,20 @@ class TkAligner(TkOverlay):
 
     self.root.attributes("-fullscreen", True)
 
-    dw_img_size = self.root.winfo_height()
-    self.dw_img_pil = img_utils.resize_img(dw_img_pil, dw_img_size, dw_img_size)
+    dw_img_width = self.root.winfo_width()
+    dw_img_height = self.root.winfo_height()
+    self.dw_img_pil = img_utils.resize_img(dw_img_pil, dw_img_width, dw_img_height)
     self.map_img_pil = img_utils.resize_img(map_img_pil, self.align_size, self.align_size)
 
+    print(self.dw_img_pil.size)
+
     back_img_frame = Frame(self.front_frame, bg=Env.bg)
-    back_img_frame.pack(fill = BOTH, expand = True)
+    back_img_frame.pack()
 
     dw_img_tk = ImageTk.PhotoImage(self.dw_img_pil)
     back_img_label = Label(back_img_frame, image = dw_img_tk)
     back_img_label.image = dw_img_tk
     back_img_label.pack()
-
-    if dw_img_pil is None:
-      raise Exception("dw_img_pil is not a valid PIL image")
-    if map_img_pil is None:
-      raise Exception("map_img_pil is not a valid PIL image")
 
     #self.front_img_frame = Frame(self.front_frame, bg="green")
     #self.Resizer = TkResizer(self.front_img_frame)
