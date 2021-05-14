@@ -31,6 +31,8 @@ class Generate(TkAligner):
 
     self.root.mainloop()
 
+    return None
+
     self.initial_img = Image.open(path.join(Env.appdata_path, "images/initial.png"))
 
     state = state_manager.get()
@@ -347,23 +349,6 @@ class Generate(TkAligner):
       img,
       mask=mask
     )
-
-  def key_press(self, event):
-    key_events = {
-      27: self.root.destroy,
-      37: self.key_left,
-      38: self.key_up,
-      39: self.key_right,
-      40: self.key_down,
-      107: self.key_plus,
-      109: self.key_minus,
-      13: self.finish
-    }
-    try:
-      key_events[event.keycode]()
-    except Exception as err:
-      print(err)
-      pass
 
   def back_frame_after(self):
     self.back_frame.focus_force()

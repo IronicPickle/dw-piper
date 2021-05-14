@@ -1,7 +1,8 @@
 from os import path
-from tkinter import Label, Frame, TOP, BOTTOM, RIGHT, LEFT, N, E, S, W, X, Y, BOTH, Tk, filedialog
+from tkinter import Label, Frame, Tk, filedialog, Canvas
 import math
 from pathlib import Path
+from tkinter.constants import CENTER, NW, TOP, BOTTOM, RIGHT, LEFT, N, E, S, W, X, Y, BOTH
 import pyautogui
 import numpy as np
 from time import sleep
@@ -29,16 +30,18 @@ class TkAligner(TkOverlay):
     if map_img_pil is None:
       raise Exception("map_img_pil is not a valid PIL image")
 
+    self.initial_dw_img_pil = dw_img_pil
+    self.initial_map_img_pil = map_img_pil
+
     super().__init__(root)
 
     state = state_manager.get()
-    self.initial_x = 0
-    self.initial_y = 0
     self.previous_rotation = int(state["rotation"] if "rotation" in state else 0)
 
     self.align_x = int(state["x"] if "x" in state else 0)
     self.align_y = int(state["y"] if "y" in state else 0)
-    self.align_size = int(state["size"] if "size" in state else 300)
+    self.align_width = int(state["width"] if "width" in state else 300)
+    self.align_height = int(state["height"] if "height" in state else 300)
     self.align_rotation = int(state["rotation"] if "rotation" in state else 0)
 
     self.generate_frames()
@@ -47,23 +50,45 @@ class TkAligner(TkOverlay):
 
     self.root.attributes("-fullscreen", True)
 
-    dw_img_width = self.root.winfo_width()
-    dw_img_height = self.root.winfo_height()
-    self.dw_img_pil = img_utils.resize_img(dw_img_pil, dw_img_width, dw_img_height)
-    self.map_img_pil = img_utils.resize_img(map_img_pil, self.align_size, self.align_size)
+    map_img_pil.putalpha(127)
+    self.dw_img_pil = img_utils.resize_img(dw_img_pil, self.root.winfo_width(), self.root.winfo_height())
+    self.map_img_pil = img_utils.resize_img(map_img_pil, self.align_width, self.align_height)
+    
+    self.img_canvas = Canvas(self.front_frame)
+    self.img_canvas.pack(fill=BOTH, expand=True)
+    
+    self.back_img_item = self.img_canvas.create_image(0, 0)
+    self.front_img_item =  self.img_canvas.create_image(0, 0, anchor=NW)
 
-    print(self.dw_img_pil.size)
-
-    back_img_frame = Frame(self.front_frame, bg=Env.bg)
-    back_img_frame.pack()
-
-    dw_img_tk = ImageTk.PhotoImage(self.dw_img_pil)
-    back_img_label = Label(back_img_frame, image = dw_img_tk)
-    back_img_label.image = dw_img_tk
-    back_img_label.pack()
-
-    #self.front_img_frame = Frame(self.front_frame, bg="green")
+    self.update_back_img()
+    self.update_front_img()
+    
     #self.Resizer = TkResizer(self.front_img_frame)
+
+    self.register_key_event(38, lambda: self.move_front_img_y_rel(-10)) # Down arrow
+    self.register_key_event(38, lambda: self.move_front_img_y_rel(-1), mod="shift") # Shift + Down arrow
+    self.register_key_event(38, lambda: self.move_front_img_y_rel(-50), mod="ctrl") # Ctrl + Down arrow
+    self.register_key_event(40, lambda: self.move_front_img_y_rel(10)) # Up arrow
+    self.register_key_event(40, lambda: self.move_front_img_y_rel(1), mod="shift") # Shift + Up arrow
+    self.register_key_event(40, lambda: self.move_front_img_y_rel(50), mod="ctrl") # Ctrl + Up arrow
+
+    self.register_key_event(37, lambda: self.move_front_img_x_rel(-10)) # Left arrow
+    self.register_key_event(37, lambda: self.move_front_img_x_rel(-1), mod="shift") # Shift + Left arrow
+    self.register_key_event(37, lambda: self.move_front_img_x_rel(-50), mod="ctrl") # Ctrl + Left arrow
+    self.register_key_event(39, lambda: self.move_front_img_x_rel(10)) # Right arrow
+    self.register_key_event(39, lambda: self.move_front_img_x_rel(1), mod="shift") # Shift + Right arrow
+    self.register_key_event(39, lambda: self.move_front_img_x_rel(50), mod="ctrl") # Ctrl + Right arrow
+
+    self.register_key_event(107, lambda: self.resize_front_img_rel(10)) # Numpad plus
+    self.register_key_event(107, lambda: self.resize_front_img_rel(2), mod="shift") # Shift + Numpad plus
+    self.register_key_event(107, lambda: self.resize_front_img_rel(50), mod="ctrl") # Ctrl + Numpad plus
+    self.register_key_event(109, lambda: self.resize_front_img_rel(-10)) # Numpad minus
+    self.register_key_event(109, lambda: self.resize_front_img_rel(-1), mod="shift") # Shift + Numpad minus
+    self.register_key_event(109, lambda: self.resize_front_img_rel(-50), mod="ctrl") # Ctrl + Numpad minus
+
+    
+    self.root.bind("<Key>", self.key_press)
+
 
     return self
 
@@ -95,7 +120,6 @@ class TkAligner(TkOverlay):
     )
     self.right_label.pack(side=RIGHT, padx=(0, 50), anchor=N)
 
-    self.root.bind("<Key>", self.key_press)
     self.root.bind("<Button-1>", self.mouse_1_down)
     self.root.bind("<ButtonRelease-1>", self.mouse_1_up)
 
@@ -106,6 +130,101 @@ class TkAligner(TkOverlay):
 
     self.back_frame.after(1, self.back_frame_after)
 
+
+
+  def move_front_img_x_rel(self, x):
+    self.move_front_img_x(self.align_x + x)
+
+  def move_front_img_x(self, x):
+    x = int(x)
+    upper_x = self.root.winfo_width()
+    if x + self.align_width > upper_x:
+      x = upper_x - self.align_width
+    elif x < 0:
+      x = 0
+    self.align_x = x
+    self.update_front_img()
+
+
+
+  def move_front_img_y_rel(self, y):
+    self.move_front_img_y(self.align_y + y)
+
+  def move_front_img_y(self, y):
+    y = int(y)
+    upper_y = self.root.winfo_height()
+    if y + self.align_height > upper_y:
+      y = upper_y - self.align_height
+    elif y < 0:
+      y = 0
+    self.align_y = y
+    self.update_front_img()
+
+
+
+  def resize_front_img_rel(self, change):
+    ratio = self.align_width / self.align_height
+    largest = self.align_width if ratio > 1 else self.align_height
+    self.resize_front_img(largest + change)
+
+  def resize_front_img(self, size):
+    size = int(size)
+    old_size = self.map_img_pil.size
+
+    new_map_img_pil = img_utils.resize_img(self.initial_map_img_pil, size, size)
+    new_align_width, new_align_height = new_map_img_pil.size
+
+    if new_align_width > self.root.winfo_width() or new_align_height > self.root.winfo_height():
+      ratio = self.align_width / self.align_height
+      smallest = self.root.winfo_width() if ratio < 1 else self.root.winfo_height()
+      return self.resize_front_img(smallest)
+    elif new_align_width < 300 or new_align_height < 300:
+      return self.resize_front_img(300)
+
+    self.map_img_pil = new_map_img_pil
+    self.align_width, self.align_height = self.map_img_pil.size
+    self.update_front_img()
+
+    new_size = new_map_img_pil.size
+    diff_x, diff_y = old_size[0] - new_size[0], old_size[1] - new_size[1]
+    self.move_front_img_x_rel(diff_x / 2)
+    self.move_front_img_y_rel(diff_y / 2)
+
+
+
+  def update_back_img(self):
+    dw_img_tk = ImageTk.PhotoImage(self.dw_img_pil)
+    self.img_canvas.itemconfigure(self.back_img_item, image=dw_img_tk)
+    self.img_canvas.move(self.back_img_item,
+      self.root.winfo_width() / 2,
+      self.root.winfo_height() / 2
+    )
+    self.img_canvas.dw_img = dw_img_tk
+
+  def update_front_img(self):
+    print(f"Updating Image: {self.align_x, self.align_y} | {self.align_width} x {self.align_height}")
+    map_img_tk = ImageTk.PhotoImage(self.map_img_pil)
+    self.img_canvas.itemconfigure(self.front_img_item, image=map_img_tk)
+    self.img_canvas.moveto(self.front_img_item, self.align_x, self.align_y)
+    self.img_canvas.map_img = map_img_tk
+
+  def on_back_destroy(self):
+    state_manager.update({
+      "x": self.align_x, "y": self.align_y,
+      "width": self.align_width, "height": self.align_height,
+      "rotation": self.align_rotation
+    })
+
+
+
+
+
+
+
+
+
+    
+
   def generate_img(self, frame, img_pil):
     None
 
@@ -113,10 +232,6 @@ class TkAligner(TkOverlay):
     align_x, align_y, align_size, align_rotation = (
       self.align_x, self.align_y, self.align_size, self.align_rotation
     )
-   
-
-  def on_destroy(self):
-    self.save_state()
 
   def corner_resize(self, event, corner):
     mouse_x = position()[0]
@@ -351,23 +466,6 @@ class TkAligner(TkOverlay):
       img,
       mask=mask
     )
-
-  def key_press(self, event):
-    key_events = {
-      27: self.root.destroy,
-      37: self.key_left,
-      38: self.key_up,
-      39: self.key_right,
-      40: self.key_down,
-      107: self.key_plus,
-      109: self.key_minus,
-      13: self.finish
-    }
-    try:
-      key_events[event.keycode]()
-    except Exception as err:
-      print(err)
-      pass
 
   def back_frame_after(self):
     self.back_frame.focus_force()

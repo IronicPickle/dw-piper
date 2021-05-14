@@ -19,7 +19,6 @@ class TkOverlay:
     self.root.attributes("-fullscreen", False)
     self.root.attributes("-alpha", 1)
     self.root.attributes("-topmost", True)
-    self.root.config(highlightthickness=1, highlightbackground="white")
     self.root.title("Duct")
     self.root.iconbitmap(path.join(Env.index_dir, "images/icon.ico"))
     self.resize()
@@ -67,9 +66,11 @@ class TkOverlay:
   def on_destroy_static(self, event):
     if event.widget is self.root:
       self.log("Root > Destroyed")
+      self.on_destroy()
       self.back_frame.destroy()
     elif event.widget is self.back_frame:
       self.log("Back Frame > Destroyed")
+      self.on_back_destroy()
 
   def on_destroy(self):
     pass
