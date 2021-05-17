@@ -6,7 +6,7 @@ def crop_img(img_path, crop_x, crop_y, crop_dx, crop_dy):
   map_img = map_img[crop_x:crop_dx, crop_y:crop_dy]
   cv2.imwrite(img_path, map_img)
 
-def resize_img(img_pil, width, height, mode = "fit"):
+def calculate_dims(img_pil, width, height, mode = "fit"):
   initial_width, initial_height = img_pil.size
   new_width, new_height = ( width, height )
 
@@ -23,7 +23,10 @@ def resize_img(img_pil, width, height, mode = "fit"):
       elif new_ratio < 1: # New width is smaller, so it's used
         new_height = new_width
   
-  return img_pil.resize(( int(new_width), int(new_height) ), Image.LANCZOS)
+  return int(new_width), int(new_height)
+
+def resize_img(img_pil, width, height):
+  return img_pil.resize(( int(width), int(height) ), Image.LANCZOS)
 
 def rotate_img(img_pil, rotation):
   return img_pil.rotate(rotation, Image.BILINEAR, expand=True)

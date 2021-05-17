@@ -58,12 +58,14 @@ class Extract:
     #width, height = img_pil.size
     #crop_img(img_path, 1, 1, width, height)
 
-    size = int(Env.res_y / 1.5)
-    state_manager.update({
-      "x": int((Env.res_x / 2) - (size / 2)),
-      "y": int((Env.res_y / 2) - (size / 2)),
-      "size": size, "rotation": 0
-    })
+    if self.source == "map":
+      ratio = Env.res_x / Env.res_y
+      smallest = ( Env.res_y if ratio > 1 else Env.res_x ) / 1.5
+      state_manager.update({
+        "x": int((Env.res_x / 2) - (smallest / 2)),
+        "y": int((Env.res_y / 2) - (smallest / 2)),
+        "width": smallest, "height": smallest, "rotation": 0
+      })
 
     if not ref:
       Utils.send_toast(

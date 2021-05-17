@@ -7,7 +7,7 @@ import numpy as np
 from time import sleep
 
 from PIL import Image, ImageTk
-from pyautogui import position
+from pyautogui import position, screenshot
 import cv2
 
 from src.auto_align import auto_align
@@ -24,7 +24,17 @@ class Generate(TkAligner):
 
   def __init__(self, root, pipe_type, water_company):
 
-    dw_img_pil = Image.open(path.join(Env.appdata_path, "images/dw_source.png"))
+    state = state_manager.get()
+    auto_dw_source = state["auto_dw_source"] if "auto_dw_source" in state else False
+
+    if auto_dw_source:
+      root.withdraw()
+      sleep(0.5)
+      dw_img_pil = screenshot()
+      root.deiconify()
+    else:
+      dw_img_pil = Image.open(path.join(Env.appdata_path, "images/dw_source.png"))
+    
     map_img_pil = Image.open(path.join(Env.appdata_path, "images/map_source.png"))
 
     super().__init__(root, dw_img_pil, map_img_pil)

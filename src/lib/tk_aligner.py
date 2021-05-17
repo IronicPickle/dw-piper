@@ -54,7 +54,7 @@ class TkAligner(TkOverlay):
     self.dw_img_pil = img_utils.resize_img(dw_img_pil, self.root.winfo_width(), self.root.winfo_height())
     self.map_img_pil = img_utils.resize_img(map_img_pil, self.align_width, self.align_height)
     
-    self.img_canvas = Canvas(self.front_frame)
+    self.img_canvas = Canvas(self.front_frame, highlightthickness=0, bg=Env.bg)
     self.img_canvas.pack(fill=BOTH, expand=True)
     
     self.back_img_item = self.img_canvas.create_image(0, 0)
@@ -62,29 +62,53 @@ class TkAligner(TkOverlay):
 
     self.update_back_img()
     self.update_front_img()
+
+    
+    print(self.dw_img_pil.size)
+    print(( self.img_canvas.winfo_screenwidth(), self.img_canvas.winfo_screenheight() ))
     
     #self.Resizer = TkResizer(self.front_img_frame)
 
-    self.register_key_event(38, lambda: self.move_front_img_y_rel(-10)) # Down arrow
-    self.register_key_event(38, lambda: self.move_front_img_y_rel(-1), mod="shift") # Shift + Down arrow
-    self.register_key_event(38, lambda: self.move_front_img_y_rel(-50), mod="ctrl") # Ctrl + Down arrow
-    self.register_key_event(40, lambda: self.move_front_img_y_rel(10)) # Up arrow
-    self.register_key_event(40, lambda: self.move_front_img_y_rel(1), mod="shift") # Shift + Up arrow
-    self.register_key_event(40, lambda: self.move_front_img_y_rel(50), mod="ctrl") # Ctrl + Up arrow
 
-    self.register_key_event(37, lambda: self.move_front_img_x_rel(-10)) # Left arrow
-    self.register_key_event(37, lambda: self.move_front_img_x_rel(-1), mod="shift") # Shift + Left arrow
-    self.register_key_event(37, lambda: self.move_front_img_x_rel(-50), mod="ctrl") # Ctrl + Left arrow
-    self.register_key_event(39, lambda: self.move_front_img_x_rel(10)) # Right arrow
-    self.register_key_event(39, lambda: self.move_front_img_x_rel(1), mod="shift") # Shift + Right arrow
-    self.register_key_event(39, lambda: self.move_front_img_x_rel(50), mod="ctrl") # Ctrl + Right arrow
+    for _, key_code in enumerate(( 87, 38 )): # Move image up
+      self.register_key_event(key_code, lambda: self.move_front_img_y_rel(-1))
+      self.register_key_event(key_code, lambda: self.move_front_img_y_rel(-10), mod="shift")
+      self.register_key_event(key_code, lambda: self.move_front_img_y_rel(-50), mod="ctrl")
 
-    self.register_key_event(107, lambda: self.resize_front_img_rel(10)) # Numpad plus
-    self.register_key_event(107, lambda: self.resize_front_img_rel(2), mod="shift") # Shift + Numpad plus
-    self.register_key_event(107, lambda: self.resize_front_img_rel(50), mod="ctrl") # Ctrl + Numpad plus
-    self.register_key_event(109, lambda: self.resize_front_img_rel(-10)) # Numpad minus
-    self.register_key_event(109, lambda: self.resize_front_img_rel(-1), mod="shift") # Shift + Numpad minus
-    self.register_key_event(109, lambda: self.resize_front_img_rel(-50), mod="ctrl") # Ctrl + Numpad minus
+    for _, key_code in enumerate(( 83, 40 )): # Move image down
+      self.register_key_event(key_code, lambda: self.move_front_img_y_rel(1))
+      self.register_key_event(key_code, lambda: self.move_front_img_y_rel(10), mod="shift")
+      self.register_key_event(key_code, lambda: self.move_front_img_y_rel(50), mod="ctrl")
+
+    for _, key_code in enumerate(( 65, 37 )): # Move image left
+      self.register_key_event(key_code, lambda: self.move_front_img_x_rel(-1))
+      self.register_key_event(key_code, lambda: self.move_front_img_x_rel(-10), mod="shift")
+      self.register_key_event(key_code, lambda: self.move_front_img_x_rel(-50), mod="ctrl")
+    
+    for _, key_code in enumerate(( 68, 39 )): # Move image right
+      self.register_key_event(key_code, lambda: self.move_front_img_x_rel(1))
+      self.register_key_event(key_code, lambda: self.move_front_img_x_rel(10), mod="shift")
+      self.register_key_event(key_code, lambda: self.move_front_img_x_rel(50), mod="ctrl")
+
+    for _, key_code in enumerate(( 82, 107 )): # Increase image size
+      self.register_key_event(key_code, lambda: self.resize_front_img_rel(2))
+      self.register_key_event(key_code, lambda: self.resize_front_img_rel(10), mod="shift")
+      self.register_key_event(key_code, lambda: self.resize_front_img_rel(50), mod="ctrl")
+    
+    for _, key_code in enumerate(( 70, 109 )): # Decrease image size
+      self.register_key_event(key_code, lambda: self.resize_front_img_rel(-2))
+      self.register_key_event(key_code, lambda: self.resize_front_img_rel(-10), mod="shift")
+      self.register_key_event(key_code, lambda: self.resize_front_img_rel(-50), mod="ctrl")
+    
+    for _, key_code in enumerate(( 69, 106 )): # Rotate clockwise
+      self.register_key_event(key_code, lambda: self.rotate_front_img_rel(-1))
+      self.register_key_event(key_code, lambda: self.rotate_front_img_rel(-15), mod="shift")
+      self.register_key_event(key_code, lambda: self.rotate_front_img_rel(-30), mod="ctrl")
+    
+    for _, key_code in enumerate(( 81, 111 )): # Rotation counter-clockwise
+      self.register_key_event(key_code, lambda: self.rotate_front_img_rel(1))
+      self.register_key_event(key_code, lambda: self.rotate_front_img_rel(15), mod="shift")
+      self.register_key_event(key_code, lambda: self.rotate_front_img_rel(30), mod="ctrl")
 
     
     self.root.bind("<Key>", self.key_press)
@@ -171,25 +195,30 @@ class TkAligner(TkOverlay):
     size = int(size)
     old_size = self.map_img_pil.size
 
-    new_map_img_pil = img_utils.resize_img(self.initial_map_img_pil, size, size)
-    new_align_width, new_align_height = new_map_img_pil.size
+    new_align_width, new_align_height = img_utils.calculate_dims(self.initial_map_img_pil, size, size)
 
     if new_align_width > self.root.winfo_width() or new_align_height > self.root.winfo_height():
       ratio = self.align_width / self.align_height
-      smallest = self.root.winfo_width() if ratio < 1 else self.root.winfo_height()
+      smallest = self.root.winfo_width() if ratio > 1 else self.root.winfo_height()
       return self.resize_front_img(smallest)
-    elif new_align_width < 300 or new_align_height < 300:
+    elif new_align_width < 300 and new_align_height < 300:
       return self.resize_front_img(300)
 
-    self.map_img_pil = new_map_img_pil
-    self.align_width, self.align_height = self.map_img_pil.size
+    self.align_width, self.align_height = new_align_width, new_align_height
     self.update_front_img()
 
-    new_size = new_map_img_pil.size
+    new_size = new_align_width, new_align_height
     diff_x, diff_y = old_size[0] - new_size[0], old_size[1] - new_size[1]
     self.move_front_img_x_rel(diff_x / 2)
     self.move_front_img_y_rel(diff_y / 2)
 
+
+  def rotate_front_img_rel(self, rotation):
+    self.rotate_front_img(self.align_rotation + rotation)
+
+  def rotate_front_img(self, rotation):
+    self.align_rotation = int(rotation)
+    self.update_front_img()
 
 
   def update_back_img(self):
@@ -203,6 +232,9 @@ class TkAligner(TkOverlay):
 
   def update_front_img(self):
     print(f"Updating Image: {self.align_x, self.align_y} | {self.align_width} x {self.align_height}")
+    self.map_img_pil = img_utils.resize_img(
+      img_utils.rotate_img(self.initial_map_img_pil, self.align_rotation), self.align_width, self.align_height
+    )
     map_img_tk = ImageTk.PhotoImage(self.map_img_pil)
     self.img_canvas.itemconfigure(self.front_img_item, image=map_img_tk)
     self.img_canvas.moveto(self.front_img_item, self.align_x, self.align_y)
